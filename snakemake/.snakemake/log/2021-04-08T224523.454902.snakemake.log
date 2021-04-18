@@ -1,0 +1,7 @@
+Building DAG of jobs...
+MissingInputException in line 7 of /vagrant/snakemake-tutorial/Snakefile:
+Missing input files for rule trim_quality_check:
+fastq/B.R1.fq.gz
+fastq/A.R1.fq.gz
+fastq/A.R2.fq.gz
+fastq/B.R2.fq.gz

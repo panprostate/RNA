@@ -1,0 +1,35 @@
+Building DAG of jobs...
+Job counts:
+	count	jobs
+	1	all
+	2	arriba
+	1	bcftools_call
+	1	salmon_index
+	2	salmon_quant
+	2	star_1pass
+	2	star_2pass
+	1	star_index
+	4	trim_quality_check
+	16
+
+[Thu Apr  8 23:45:41 2021]
+rule salmon_index:
+    input: data/transcripts.fa, data/decoys.txt
+    output: index/salmon_hg38
+    jobid: 2
+
+
+[Thu Apr  8 23:45:41 2021]
+rule trim_quality_check:
+    input: fastq/A_R1.fq.gz, fastq/A_R2.fq.gz, fastq/B_R1.fq.gz, fastq/B_R2.fq.gz
+    output: trim/A_R1.fq, trim/AR1
+    jobid: 3
+    wildcards: sample=A, strand=R1
+
+RuleException in line 7 of /vagrant/snakemake-tutorial/Snakefile:
+NameError: The name 'sample' is unknown in this context. Did you mean 'wildcards.sample'?
+  File "/home/vagrant/mambaforge/lib/python3.8/site-packages/snakemake/executors/__init__.py", line 136, in run_jobs
+  File "/home/vagrant/mambaforge/lib/python3.8/site-packages/snakemake/executors/__init__.py", line 145, in run
+  File "/home/vagrant/mambaforge/lib/python3.8/site-packages/snakemake/executors/__init__.py", line 156, in _run
+  File "/home/vagrant/mambaforge/lib/python3.8/site-packages/snakemake/executors/__init__.py", line 176, in printjob
+  File "/home/vagrant/mambaforge/lib/python3.8/site-packages/snakemake/executors/__init__.py", line 162, in printjob

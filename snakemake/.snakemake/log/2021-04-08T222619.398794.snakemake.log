@@ -1,0 +1,2 @@
+SyntaxError in line 7 of /vagrant/snakemake-tutorial/Snakefile:
+Unexpected keyword fusion in rule definition (Snakefile, line 7)

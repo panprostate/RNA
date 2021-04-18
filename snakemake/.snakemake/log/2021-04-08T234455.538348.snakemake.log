@@ -1,0 +1,5 @@
+Building DAG of jobs...
+MissingInputException in line 123 of /vagrant/snakemake-tutorial/Snakefile:
+Missing input files for rule bcftools_call:
+sorted_reads/A.bam
+sorted_reads/B.bam

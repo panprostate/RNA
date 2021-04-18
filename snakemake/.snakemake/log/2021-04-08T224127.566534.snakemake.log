@@ -1,0 +1,2 @@
+SyntaxError in line 31 of /vagrant/snakemake-tutorial/Snakefile:
+Unexpected keyword index in rule definition (Snakefile, line 31)

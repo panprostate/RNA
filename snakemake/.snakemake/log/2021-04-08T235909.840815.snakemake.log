@@ -1,0 +1,90 @@
+Building DAG of jobs...
+Job counts:
+	count	jobs
+	1	all
+	2	arriba
+	1	bcftools_call
+	1	salmon_index
+	2	salmon_quant
+	2	star_1pass
+	2	star_2pass
+	1	star_index
+	6	trim_quality_check
+	18
+
+[Thu Apr  8 23:59:10 2021]
+rule star_index:
+    input: data/genome.fa, data/gtf.gtf
+    output: index/hg38
+    jobid: 10
+
+
+[Thu Apr  8 23:59:10 2021]
+rule trim_quality_check:
+    input: fastq/A_R1.fq.gz, fastq/A_R2.fq.gz, fastq/B_R1.fq.gz, fastq/B_R2.fq.gz
+    output: trim/B
+    jobid: 13
+    wildcards: sample=B
+
+
+[Thu Apr  8 23:59:10 2021]
+rule salmon_index:
+    input: data/transcripts.fa, data/decoys.txt
+    output: index/salmon_hg38
+    jobid: 2
+
+
+[Thu Apr  8 23:59:10 2021]
+rule trim_quality_check:
+    input: fastq/A_R1.fq.gz, fastq/A_R2.fq.gz, fastq/B_R1.fq.gz, fastq/B_R2.fq.gz
+    output: trim/A_R2.fq
+    jobid: 4
+    wildcards: sample=A_R2.fq
+
+
+[Thu Apr  8 23:59:10 2021]
+rule trim_quality_check:
+    input: fastq/A_R1.fq.gz, fastq/A_R2.fq.gz, fastq/B_R1.fq.gz, fastq/B_R2.fq.gz
+    output: trim/B_R2.fq
+    jobid: 6
+    wildcards: sample=B_R2.fq
+
+
+[Thu Apr  8 23:59:10 2021]
+rule trim_quality_check:
+    input: fastq/A_R1.fq.gz, fastq/A_R2.fq.gz, fastq/B_R1.fq.gz, fastq/B_R2.fq.gz
+    output: trim/A_R1.fq
+    jobid: 3
+    wildcards: sample=A_R1.fq
+
+
+[Thu Apr  8 23:59:10 2021]
+rule trim_quality_check:
+    input: fastq/A_R1.fq.gz, fastq/A_R2.fq.gz, fastq/B_R1.fq.gz, fastq/B_R2.fq.gz
+    output: trim/B_R1.fq
+    jobid: 5
+    wildcards: sample=B_R1.fq
+
+
+[Thu Apr  8 23:59:10 2021]
+rule trim_quality_check:
+    input: fastq/A_R1.fq.gz, fastq/A_R2.fq.gz, fastq/B_R1.fq.gz, fastq/B_R2.fq.gz
+    output: trim/A
+    jobid: 12
+    wildcards: sample=A
+
+
+[Thu Apr  8 23:59:10 2021]
+rule star_1pass:
+    input: index/hg38, trim/A, trim/B, trim/A_R1.fq, trim/A_R2.fq, trim/B_R1.fq, trim/B_R2.fq
+    output: STAR/A, STAR/A/A_SJ.out.tab, STAR/A/A_Signal.UniqueMultiple.str1.out.wig, STAR/A/A_Aligned.sortedByCoord.out.bam
+    jobid: 11
+    wildcards: sample=A
+
+RuleException in line 31 of /vagrant/snakemake-tutorial/Snakefile:
+NameError: The name 'index' is unknown in this context. Please make sure that you defined that variable. Also note that braces not used for variable access have to be escaped by repeating them, i.e. {{print $1}}
+  File "/home/vagrant/mambaforge/lib/python3.8/site-packages/snakemake/executors/__init__.py", line 136, in run_jobs
+  File "/home/vagrant/mambaforge/lib/python3.8/site-packages/snakemake/executors/__init__.py", line 145, in run
+  File "/home/vagrant/mambaforge/lib/python3.8/site-packages/snakemake/executors/__init__.py", line 156, in _run
+  File "/home/vagrant/mambaforge/lib/python3.8/site-packages/snakemake/executors/__init__.py", line 176, in printjob
+  File "/home/vagrant/mambaforge/lib/python3.8/site-packages/snakemake/executors/__init__.py", line 162, in printjob

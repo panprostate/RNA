@@ -1,0 +1,2 @@
+SyntaxError in line 34 of /vagrant/snakemake-tutorial/Snakefile:
+Unexpected keyword dir in rule definition (Snakefile, line 34)

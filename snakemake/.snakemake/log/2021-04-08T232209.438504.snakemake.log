@@ -1,0 +1,3 @@
+WildcardError in line 33 of /vagrant/snakemake-tutorial/Snakefile:
+No values given for wildcard 'sample'.
+  File "/vagrant/snakemake-tutorial/Snakefile", line 33, in <module>
