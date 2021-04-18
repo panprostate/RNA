@@ -1,4 +1,0 @@
-Building DAG of jobs...
-MissingInputException in line 89 of /vagrant/snakemake-tutorial/Snakefile:
-Missing input files for rule salmon_index:
-data/trascripts.fa

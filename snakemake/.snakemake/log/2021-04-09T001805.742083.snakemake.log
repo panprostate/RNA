@@ -1,2 +1,0 @@
-SyntaxError in line 6 of /vagrant/snakemake-tutorial/Snakefile:
-Expecting rule keyword, comment or docstrings inside a rule definition. (Snakefile, line 6)

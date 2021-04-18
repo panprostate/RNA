@@ -1,4 +1,0 @@
-Building DAG of jobs...
-MissingInputException in line 164 of /vagrant/snakemake-tutorial/Snakefile:
-Missing input files for rule megadepth:
-data/pasites.bed

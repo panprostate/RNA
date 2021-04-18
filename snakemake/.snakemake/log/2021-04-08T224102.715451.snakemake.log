@@ -1,2 +1,0 @@
-SyntaxError in line 15 of /vagrant/snakemake-tutorial/Snakefile:
-Unexpected keyword gtf in rule definition (Snakefile, line 15)

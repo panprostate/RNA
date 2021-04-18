@@ -1,3 +1,0 @@
-NameError in line 9 of /vagrant/snakemake-tutorial/Snakefile:
-name 'R1' is not defined
-  File "/vagrant/snakemake-tutorial/Snakefile", line 9, in <module>

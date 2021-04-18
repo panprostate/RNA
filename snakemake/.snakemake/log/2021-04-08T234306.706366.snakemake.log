@@ -1,4 +1,0 @@
-Building DAG of jobs...
-WildcardError in line 3 of /vagrant/snakemake-tutorial/Snakefile:
-Wildcards in input files cannot be determined from output files:
-'sample'
