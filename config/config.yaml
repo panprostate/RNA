@@ -1,0 +1,90 @@
+samples: "config/samples.tsv"
+################################################################################
+# RESOURCES CONFIGURATION
+################################################################################
+adapters: "-a AGATCGGAAGAGCACACGTCTGAACTCCAGTCA -A AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT"
+reference: "Homo_sapiens_assembly19_1000genomes_decoy.fasta"
+dict: "Homo_sapiens_assembly19_1000genomes_decoy.dict"
+faidx: "Homo_sapiens_assembly19_1000genomes_decoy.fasta.fai"
+transcripts: "gencode.v38lift37.transcripts.fa.gz"
+gtf: "gencode.v38lift37.annotation.gtf.gz"
+compression_level: 4
+paSites: "pasites_hg19.bed"
+blacklist: "resources/blacklist_hg19_hs37d5_GRCh37_v2.1.0.tsv.gz"
+knowFusions: "resources/known_fusions_hg19_hs37d5_GRCh37_v2.1.0.tsv.gz"
+proteinDomains: "resources/protein_domains_hg19_hs37d5_GRCh37_v2.1.0.gff3"
+dbSNP: "Homo_sapiens_assembly19_1000genomes_decoy.dbsnp138.vcf"
+knowIndels: "Mills_and_1000G_gold_standard.indels.b37.sites.vcf"
+################################################################################
+# ncpus_* = Number of threads to allocate for the job
+# mem_* = Amount of memory in MB to allocate for the job
+# rt_* = Max runtime the job is allow to run before it is killed
+################################################################################
+
+
+# Trimming and Quality Control
+ncpus_trim: 4
+mem_trim: 8000
+rt_trim: "04:00:00"
+
+# STAR Index
+ncpus_STAR_index: 16
+mem_STAR_index: 60000
+rt_STAR_index: "08:00:00"
+
+# STAR Align
+ncpus_STAR_align: 8
+mem_STAR_align: 60000
+rt_STAR_align: "08:00:00"
+
+# Sort Bam (please note that max mem per thread is set to 2GB, do not allocate less than ncpus*2000Mb of RAM)
+ncpus_sortBam: 4
+mem_sortBam: 10000
+rt_sortBam: "08:00:00"
+
+# Salmon Index
+ncpus_salmonIndex: 4
+mem_salmonIndex: 60000
+rt_salmonIndex: "04:00:00"
+
+# Salmon quant
+ncpus_salmonQuant: 8
+mem_salmonQuant: 15000
+rt_salmonQuant: "04:00:00"
+
+# FeatureCounts
+ncpus_fc: 2
+mem_fc: 8000
+rt_fc: "04:00:00"
+fc_strand: 2
+
+# TxImport
+mem_txi: 8000
+rt_txi: "04:00:00"
+
+# arriba
+mem_arriba: 20000
+rt_arriba: "04:00:00"
+
+# STAR-fusion
+ncpus_STARfusion: 2
+mem_STARfusion: 8000
+rt_STARfusion: "04:00:00"
+
+################################################################################
+# Variant Calling Pipeline Configurations
+################################################################################
+mem_create_uBam: 4000
+rt_create_uBam: "04:00:00"
+mem_mergeBams: 4000
+rt_mergeBams: "04:00:00"
+mem_markDuplicates: 4000
+rt_markDuplicates: "08:00:00"
+mem_splitNCigars: 4000
+rt_splitNCigars: "04:00:00"
+mem_baseRecalibrator: 6000
+rt_baseRecalibrator: "08:00:00"
+mem_applyBQSR: 4000
+rt_applyBQSR: "12:00:00"
+mem_haplotypeCaller: 8000
+rt_haplotypeCaller: "12:00:00"

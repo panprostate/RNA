@@ -1,0 +1,16 @@
+channels:
+  - bioconda
+  - conda-forge
+dependencies:
+  - snakemake-minimal >=6.2.1
+  - cutadapt =3.4
+  - star =2.7.8a
+  - salmon =1.4.0
+  - arriba =2.1.0
+  - megadepth =1.1.0
+  - samtools =1.12
+  - bioconductor-rsubread =2.4.3
+  - bioconductor-genomicfeatures =1.42.2
+  - bioconductor-tximport =1.18.0
+  - gffutils =0.10.1
+  - rseqc =4.0.0
