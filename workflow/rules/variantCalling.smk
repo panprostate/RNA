@@ -30,11 +30,98 @@ rule VC_create_intervalList:
     script:
         "scripts/createInterval.R"
 
+rule VC_create_uBam:
+    input:
+        f1="results/trim/{sample}/{sample}_{unit}_R1_trimmed.fastq.gz",
+        f2="results/trim/{sample}/{sample}_{unit}_R2_trimmed.fastq.gz"
+    output:
+        ubam="results/variantCalling/ubams/{sample}_{unit}.ubam"
+    params:
+        compression=config["compression_level"],
+        RG="{sample}"
+    threads: 2
+    resources:
+        mem_mb=config["mem_create_uBam"],
+        runtime_min=config["rt_create_uBam"]
+    benchmark:
+        "benchmark/create_uBam/{sample}_{unit}.tsv"
+    log:
+        "logs/create_uBam/{sample}_{unit}.log"
+    shell:
+        """
+        RG= $(baseanme {input.f1} |  sed 's/\.R1.f.*//g')
+        SM= $(baseanme {input.f1} |  sed 's/_L00.*//g')
+        FastqToSam \
+        -F1 {input.f1} \
+        -F2 {input.f2} \
+        -O {output.ubam} \
+        -RG {params.RG} \
+        -SM $SM \
+        -PL illumina \
+        --COMPRESSION_LEVEL {params.compression} 2>> {log}
+        """
 
+
+rule VC_mergeuBams:
+    input:
+        reference=config["reference"],
+        refDict=config["dict"],
+        refIndex=config["faidx"],
+        ubam="results/variantCalling/ubams/{sample}_{unit}.ubam",
+        bam="results/sortedBams/{sample}_{unit}.Aligned.sortedByCoord.out.bam"
+    output:
+        merged=temp("results/variantCalling/mergedBam/{sample}_{unit}.bam")
+    params:
+        compression=config["compression_level"]
+    threads: 2
+    resources:
+        mem_mb=config["mem_mergeBams"],
+        runtime_min=config["rt_mergeBams"]
+    benchmark:
+        "benchmark/mergeBams/{sample}_{unit}.tsv"
+    log:
+        "logs/mergeBams/{sample}_{unit}.log"
+    shell:
+        """
+        gatk \
+        MergeBamAlignment \
+        --REFERENCE_SEQUENCE {input.reference} \
+        --UNMAPPED_BAM {input.ubam} \
+        --ALIGNED_BAM {input.bam} \
+        --OUTPUT {output.merged} \
+        --INCLUDE_SECONDARY_ALIGNMENTS false \
+        --VALIDATION_STRINGENCY SILENT \
+        --COMPRESSION_LEVEL {params.compression} 2>> {log}
+        """
+
+rule VC_concatBam:
+    input:
+        bams=VC_gather_bams
+    output:
+        mbam="results/variantCalling/concatBam/{sample}.Aligned.sortedByCoord.out.bam"
+    threads: config["ncpus_mergeBam"]
+    resources:
+        mem_mb=config["mem_mergeBam"],
+        runtime_min=config["rt_mergeBam"]
+    benchmark:
+        "benchmark/mergedBam/{sample}.tsv"
+    log:
+        "logs/mergedBam/{sample}.log"
+    conda:
+        "../envs/RNAseq.yaml"
+    shell:
+        """
+        INPUT=({input.bams})
+        if ((${{#INPUT[@]}} == 1)); then
+            cp {input.bams} {output.mbam}
+        else
+            samtools merge -f -1 {output.mbam} {input.bams} 2>>{log}
+        fi
+        """
 
 rule VC_markDuplicates:
     input:
-        bam="results/sortedBams/{sample}.Aligned.sortedByCoord.out.bam"
+        bam="results/variantCalling/concatBam/{sample}.Aligned.sortedByCoord.out.bam"
     output:
         dedup=temp("results/variantCalling/markDuplicates/{sample}.bam"),
         index=temp("results/variantCalling/markDuplicates/{sample}.bam.bai"),
@@ -56,7 +143,7 @@ rule VC_markDuplicates:
         gatk \
         MarkDuplicates \
         --INPUT {input.bam} \
-        --OUTPUT {input.dedup} \
+        --OUTPUT {output.dedup} \
         --CREATE_INDEX true \
         --VALIDATION_STRINGENCY SILENT \
         --METRICS_FILE output.metrics \
@@ -162,9 +249,9 @@ rule VC_applyBQSR:
         ApplyBQSR \
         --add-output-sam-program-record \
         -R {input.reference} \
-        -I {input.recalbam} \
+        -I {input.bam} \
         --use-original-qualities \
-        -O {output.bam} \
+        -O {output.recalbam} \
         --bqsr-recal-file {output.report} \
         --COMPRESSION_LEVEL {params.compression} 2>> {log}
         """
@@ -200,7 +287,7 @@ rule VC_haplotypeCaller:
         -O {output.vcf} \
         -dont-use-soft-clipped-bases \
         --standard-min-confidence-threshold-for-calling 20 \
-        --dbsnp {dbSNP} 2>> {log}
+        --dbsnp {input.dbSNP} 2>> {log}
         """
 
 rule VC_filterVCF:

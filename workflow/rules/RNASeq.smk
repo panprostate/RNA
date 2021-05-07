@@ -3,7 +3,8 @@ rule trim:
         get_fastq
     output:
         fastq1=temp("results/trim/{sample}/{sample}_{unit}_R1_trimmed.fastq.gz"),
-        fastq2=temp("results/trim/{sample}/{sample}_{unit}_R2_trimmed.fastq.gz")
+        fastq2=temp("results/trim/{sample}/{sample}_{unit}_R2_trimmed.fastq.gz"),
+        qc="results/qc/{sample}/{sample}_{unit}_trim.log"
     params:
         adapters=config["adapters"],
         compression=config["compression_level"]
@@ -56,10 +57,10 @@ rule star_index:
 rule star_1pass:
     input:
         index="results/index/hg19/SA",
-        f1=gather_STAR_input1,
-        f2=gather_STAR_input2
+        f1="results/trim/{sample}/{sample}_{unit}_R1_trimmed.fastq.gz",
+        f2="results/trim/{sample}/{sample}_{unit}_R2_trimmed.fastq.gz"
     output:
-        SJ="results/STAR_1p/{sample}.SJ.out.tab"
+        SJ="results/STAR_1p/{sample}_{unit}.SJ.out.tab"
     params:
         idx="results/index/hg19"
     threads: config["ncpus_STAR_align"]
@@ -67,9 +68,9 @@ rule star_1pass:
         mem_mb=config["mem_STAR_align"],
         runtime_min=config["rt_STAR_align"]
     benchmark:
-        "benchmark/STAR_1p/{sample}.tsv"
+        "benchmark/STAR_1p/{sample}_{unit}.tsv"
     log:
-        "logs/STAR_1p/{sample}.log"
+        "logs/STAR_1p/{sample}_{unit}.log"
     conda:
         "../envs/RNAseq.yaml"
     shell:
@@ -104,30 +105,29 @@ rule star_1pass:
         --chimMultimapNmax 20 \
         --outSAMtype None \
         --outSAMmode None \
-        --outFileNamePrefix STAR_1p/{{wildcards.sample} 2>&1 | tee -a {log}
+        --outFileNamePrefix STAR_1p/{wildcards.sample} 2>&1 | tee -a {log}
         """
 
 rule star_2pass:
     input:
-        f1=gather_STAR_input1,
-        f2=gather_STAR_input2,
+        f1="results/trim/{sample}/{sample}_{unit}_R1_trimmed.fastq.gz",
+        f2="results/trim/{sample}/{sample}_{unit}_R2_trimmed.fastq.gz",
         index="results/index/hg19/SA",
         SJ=gather_SJ
     output:
-        bam=temp("results/STAR_2p/{sample}.Aligned.out.bam"),
-        star_logs=multiext("STAR_2p/{sample}", ".Log.final.out", ".Log.out", ".Chimeric.out.junction")
+        bam=temp("results/STAR_2p/{sample}_{unit}.Aligned.out.bam"),
+        star_logs=multiext("STAR_2p/{sample}_{unit}", ".Log.final.out", ".Log.out", ".Chimeric.out.junction")
     params:
         compression=config["compression_level"],
-        idx="results/index/hg19",
-        RG=get_RG_groups
+        idx="results/index/hg19"
     threads: config["ncpus_STAR_align"]
     resources:
         mem_mb=config["mem_STAR_align"],
         runtime_min=config["rt_STAR_align"]
     benchmark:
-        "benchmark/STAR_2p/{sample}.tsv"
+        "benchmark/STAR_2p/{sample}_{unit}.tsv"
     log:
-        "logs/STAR_2p/{sample}.log"
+        "logs/STAR_2p/{sample}_{unit}.log"
     conda:
         "../envs/RNAseq.yaml"
     shell:
@@ -138,7 +138,6 @@ rule star_2pass:
         --runThreadN 8 \
         --readFilesCommand zcat \
         --outBAMCompression {params.compression} \
-        --outSAMattrRGline {params.RG} \
         --outFilterMultimapScoreRange 1 \
         --outFilterMultimapNmax 20 \
         --outFilterMismatchNmax 10 \
@@ -174,18 +173,18 @@ rule star_2pass:
 
 rule sortBam:
     input:
-        bam="results/STAR_2p/{sample}.Aligned.out.bam"
+        bam="results/STAR_2p/{sample}_{unit}.Aligned.out.bam"
     output:
-        sbam="results/sortedBams/{sample}.Aligned.sortedByCoord.out.bam",
-        bai="results/sortedBams/{sample}.Aligned.sortedByCoord.out.bam.bai"
+        sbam="results/sortedBams/{sample}_{unit}.Aligned.sortedByCoord.out.bam",
+        bai="results/sortedBams/{sample}_{unit}.Aligned.sortedByCoord.out.bam.bai"
     threads: config["ncpus_sortBam"]
     resources:
         mem_mb=config["mem_sortBam"],
         runtime_min=config["rt_sortBam"]
     benchmark:
-        "benchmark/sortBam/{sample}.tsv"
+        "benchmark/sortBam/{sample}_{unit}.tsv"
     log:
-        "logs/sortBam/{sample}.log"
+        "logs/sortBam/{sample}_{unit}.log"
     conda:
         "../envs/RNAseq.yaml"
     shell:
@@ -193,6 +192,37 @@ rule sortBam:
         samtools sort -@ {threads} -m 2G {input.bam} -o {output.sbam} 2>>{log}
         samtools index {output.sbam}
         """
+
+rule mergeBam:
+    input:
+        bams=gather_bams
+    output:
+        mbam="results/mergedBam/{sample}.Aligned.sortedByCoord.out.bam",
+        bai="results/mergedBam/{sample}.Aligned.sortedByCoord.out.bam.bai"
+    params:
+        bams=gather_bams
+    threads: config["ncpus_mergeBam"]
+    resources:
+        mem_mb=config["mem_mergeBam"],
+        runtime_min=config["rt_mergeBam"]
+    benchmark:
+        "benchmark/mergedBam/{sample}.tsv"
+    log:
+        "logs/mergedBam/{sample}.log"
+    conda:
+        "../envs/RNAseq.yaml"
+    shell:
+        """
+        INPUT=({input.bams})
+        if ((${{#INPUT[@]}} == 1)); then
+            cp {input.bams} {output.mbam}
+            cp {input.bams}.bai {output.mbam}.bai
+        else
+            samtools merge -f -1 {output.mbam} {input.bams} 2>>{log}
+            samtools index {output.mbam}
+        fi
+        """
+
 
 rule salmon_index:
     input:
@@ -245,7 +275,7 @@ rule salmon_quant:
 
 rule featureCounts:
     input:
-        bam="results/sortedBams/{sample}.Aligned.sortedByCoord.out.bam",
+        bam="results/mergedBam/{sample}.Aligned.sortedByCoord.out.bam",
         gtf=config["gtf"]
     output:
         gene_counts="results/counts/featureCounts/{sample}_geneCounts.tab",
@@ -285,12 +315,12 @@ rule TxImport:
 
 rule arriba:
     input:
-        bam="results/sortedBams/{sample}.Aligned.sortedByCoord.out.bam",
+        bam="results/mergedBam/{sample}.Aligned.sortedByCoord.out.bam",
         reference=config["reference"],
         gtf=config["gtf"],
-        bl="resources/blacklist_hg38_GRCh38_v2.1.0.tsv.gz",
-        kf="resources/known_fusions_hg38_GRCh38_v2.1.0.tsv.gz",
-        pd="resources/protein_domains_hg38_GRCh38_v2.1.0.gff3"
+        bl="resources/blacklist_hg19_hs37d5_GRCh37_v2.1.0.tsv.gz",
+        kf="resources/known_fusions_hg19_hs37d5_GRCh37_v2.1.0.tsv.gz",
+        pd="resources/protein_domains_hg19_hs37d5_GRCh37_v2.1.0.gff3"
     output:
         fusion="results/fusion/arriba/{sample}.tsv",
         discarded="results/fusion/arriba/{sample}_discarded.tsv"
@@ -344,7 +374,7 @@ rule arriba:
 rule megadepth:
     input:
         bed=config["paSites"],
-        bam="results/sortedBams/{sample}.Aligned.sortedByCoord.out.bam"
+        bam="results/mergedBam/{sample}.Aligned.sortedByCoord.out.bam"
     output:
         paQuant="results/paQuant/{sample}_paQuant.tab"
     conda:

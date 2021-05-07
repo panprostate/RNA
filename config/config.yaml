@@ -3,18 +3,18 @@ samples: "config/samples.tsv"
 # RESOURCES CONFIGURATION
 ################################################################################
 adapters: "-a AGATCGGAAGAGCACACGTCTGAACTCCAGTCA -A AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT"
-reference: "Homo_sapiens_assembly19_1000genomes_decoy.fasta"
-dict: "Homo_sapiens_assembly19_1000genomes_decoy.dict"
-faidx: "Homo_sapiens_assembly19_1000genomes_decoy.fasta.fai"
-transcripts: "gencode.v38lift37.transcripts.fa.gz"
-gtf: "gencode.v38lift37.annotation.gtf.gz"
+reference: "resources/Homo_sapiens_assembly19_1000genomes_decoy.fasta"
+dict: "resources/Homo_sapiens_assembly19_1000genomes_decoy.dict"
+faidx: "resources/Homo_sapiens_assembly19_1000genomes_decoy.fasta.fai"
+transcripts: "resources/gencode.v38lift37.transcripts.fa.gz"
+gtf: "resources/gencode.v38lift37.annotation.gtf.gz"
 compression_level: 4
-paSites: "pasites_hg19.bed"
+paSites: "resources/pasites_hg19.bed.gz"
 blacklist: "resources/blacklist_hg19_hs37d5_GRCh37_v2.1.0.tsv.gz"
 knowFusions: "resources/known_fusions_hg19_hs37d5_GRCh37_v2.1.0.tsv.gz"
 proteinDomains: "resources/protein_domains_hg19_hs37d5_GRCh37_v2.1.0.gff3"
-dbSNP: "Homo_sapiens_assembly19_1000genomes_decoy.dbsnp138.vcf"
-knowIndels: "Mills_and_1000G_gold_standard.indels.b37.sites.vcf"
+dbSNP: "resources/Homo_sapiens_assembly19_1000genomes_decoy.dbsnp138.vcf"
+knowIndels: "resources/Mills_and_1000G_gold_standard.indels.b37.sites.vcf"
 ################################################################################
 # ncpus_* = Number of threads to allocate for the job
 # mem_* = Amount of memory in MB to allocate for the job
@@ -41,6 +41,11 @@ rt_STAR_align: "08:00:00"
 ncpus_sortBam: 4
 mem_sortBam: 10000
 rt_sortBam: "08:00:00"
+
+# Merge Bam
+ncpus_mergeBam: 4
+mem_mergeBam: 10000
+rt_mergeBam: "08:00:00"
 
 # Salmon Index
 ncpus_salmonIndex: 4
