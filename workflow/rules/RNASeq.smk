@@ -21,7 +21,8 @@ rule trim:
     shell:
         "cutadapt"
         " {params.adapters}"
-        " -Z {params.compression}"
+        " -m 31"
+        " --compression-level {params.compression}"
         " -o {output.fastq1}"
         " -p {output.fastq2}"
         " -j {threads}"

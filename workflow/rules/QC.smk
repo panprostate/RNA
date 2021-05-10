@@ -7,7 +7,7 @@ rule rseqc_gtf2bed:
     log:
         "logs/rseqc_gtf2bed.log",
     conda:
-        "../envs/gffutils.yaml"
+        "../envs/RNAseq.yaml"
     script:
         "../scripts/gtf2bed.py"
 
