@@ -58,3 +58,6 @@ snakemake --use-conda --use-singularity --profile slurm_profile
 ```
 
 The workflow will automatically pull and create a Singularity container from `docker://condaforge/mambaforge:4.10.1-0` and install the necessary packages for each enviroment.
+
+# **Workflow overview**
+![overview](https://github.com/panprostate/RNA/blob/master/workflow-schematics.jpg?raw=true)
