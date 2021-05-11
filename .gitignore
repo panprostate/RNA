@@ -2,7 +2,4 @@
 .conda/
 job_logs/
 results/
-resources/Homo_sapiens_assembly19_1000genomes_decoy*
-resources/gencode.v38lift37*
-resources/Mills*
 .DS_Store
