@@ -2,4 +2,5 @@
 .conda/
 job_logs/
 results/
+resources/
 .DS_Store
