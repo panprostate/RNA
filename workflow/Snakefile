@@ -1,4 +1,4 @@
-container: "docker://continuumio/miniconda3:4.9.2"
+container: "docker://condaforge/mambaforge:4.10.1-0"
 import pandas as pd
 configfile: "config/config.yaml"
 

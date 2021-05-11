@@ -55,13 +55,40 @@ rule star_index:
         " --sjdbGTFfile {input.gtf}"
         " --runThreadN {threads} 2>&1 | tee -a {log}"
 
+rule salmon_index:
+    input:
+        transcripts=config["transcripts"],
+        reference=config["reference"]
+    output:
+        "results/index/salmon_hg19/ctable.bin"
+    params:
+        idx="results/index/salmon_hg19/"
+    threads: config["ncpus_salmonIndex"]
+    resources:
+        mem_mb=config["mem_salmonIndex"],
+        runtime_min=config["rt_salmonIndex"]
+    benchmark:
+        "benchmark/salmonIndex/salmonIndex.tsv"
+    log:
+        "logs/salmonIndex/salmonIndex.log"
+    conda:
+        "../envs/RNAseq.yaml"
+    shell:
+        """
+        cat {input.transcripts} {input.reference} > resources/gentrome.fa
+        grep "^>" {input.reference} | cut -d " " -f 1 > resources/decoys.txt
+        sed -i -e 's/>//g' resources/decoys.txt
+        salmon index -t resources/gentrome.fa -i {params.idx} -p {threads} --decoys resources/decoys.txt --gencode -k 31 2>&1 | tee -a {log}
+        rm -f resources/gentrome.fa resources/decoys.txt
+        """
+
 rule star_1pass:
     input:
         index="results/index/hg19/SA",
         f1="results/trim/{sample}/{sample}_{unit}_R1_trimmed.fastq.gz",
         f2="results/trim/{sample}/{sample}_{unit}_R2_trimmed.fastq.gz"
     output:
-        SJ="results/STAR_1p/{sample}_{unit}.SJ.out.tab"
+        SJ=temp(multiext("results/STAR_1p/{sample}_{unit}", "SJ.out.tab", "Log.progress.out", "Chimeric.out.junction", "Log.final.out", "Log.out"))
     params:
         idx="results/index/hg19"
     threads: config["ncpus_STAR_align"]
@@ -97,7 +124,6 @@ rule star_1pass:
         --alignSplicedMateMapLminOverLmate 0.5 \
         --alignSJstitchMismatchNmax 5 -1 5 5 \
         --chimSegmentMin 10 \
-        --chimOutType Junctions WithinBAM HardClip \
         --chimJunctionOverhangMin 10 \
         --chimScoreDropMax 30 \
         --chimScoreJunctionNonGTAG 0 \
@@ -106,7 +132,7 @@ rule star_1pass:
         --chimMultimapNmax 20 \
         --outSAMtype None \
         --outSAMmode None \
-        --outFileNamePrefix STAR_1p/{wildcards.sample} 2>&1 | tee -a {log}
+        --outFileNamePrefix results/STAR_1p/{wildcards.sample}_{wildcards.unit} 2>&1 | tee -a {log}
         """
 
 rule star_2pass:
@@ -116,8 +142,8 @@ rule star_2pass:
         index="results/index/hg19/SA",
         SJ=gather_SJ
     output:
-        bam=temp("results/STAR_2p/{sample}_{unit}.Aligned.out.bam"),
-        star_logs=multiext("STAR_2p/{sample}_{unit}", ".Log.final.out", ".Log.out", ".Chimeric.out.junction")
+        bam=temp("results/STAR_2p/{sample}_{unit}Aligned.out.bam"),
+        star_logs=multiext("results/STAR_2p/{sample}_{unit}", "SJ.out.tab", "Log.final.out", "Log.out", "Chimeric.out.junction")
     params:
         compression=config["compression_level"],
         idx="results/index/hg19"
@@ -138,13 +164,14 @@ rule star_2pass:
         --readFilesIn {input.f1} {input.f2} \
         --runThreadN 8 \
         --readFilesCommand zcat \
-        --outBAMCompression {params.compression} \
+        --outBAMcompression {params.compression} \
         --outFilterMultimapScoreRange 1 \
         --outFilterMultimapNmax 20 \
         --outFilterMismatchNmax 10 \
         --alignIntronMax 500000 \
         --alignMatesGapMax 1000000 \
         --sjdbScore 2 \
+        --outSAMtype BAM Unsorted \
         --alignSJDBoverhangMin 5 \
         --genomeLoad NoSharedMemory \
         --sjdbFileChrStartEnd {input.SJ} \
@@ -163,18 +190,13 @@ rule star_2pass:
         --chimScoreSeparation 1 \
         --chimSegmentReadGapMax 3 \
         --chimMultimapNmax 20 \
-        --outSAMtype BAM Unsorted \
-        --outSAMmode None \
-        --outWigType wiggle \
-        --outWigStrand Unstranded \
-        --outWigNorm None \
-        --outFileNamePrefix STAR_2p/{wildcards.sample} 2>&1 | tee -a {log}
+        --outFileNamePrefix results/STAR_2p/{wildcards.sample}_{wildcards.unit} 2>&1 | tee -a {log}
         """
 
 
 rule sortBam:
     input:
-        bam="results/STAR_2p/{sample}_{unit}.Aligned.out.bam"
+        bam="results/STAR_2p/{sample}_{unit}Aligned.out.bam"
     output:
         sbam="results/sortedBams/{sample}_{unit}.Aligned.sortedByCoord.out.bam",
         bai="results/sortedBams/{sample}_{unit}.Aligned.sortedByCoord.out.bam.bai"
@@ -224,33 +246,6 @@ rule mergeBam:
         fi
         """
 
-
-rule salmon_index:
-    input:
-        transcripts=config["transcripts"],
-        reference=config["reference"]
-    output:
-        "results/index/salmon_hg19/ctable.bin"
-    params:
-        idx="results/index/salmon_hg19/"
-    threads: config["ncpus_salmonIndex"]
-    resources:
-        mem_mb=config["mem_salmonIndex"],
-        runtime_min=config["rt_salmonIndex"]
-    benchmark:
-        "benchmark/salmonIndex/salmonIndex.tsv"
-    log:
-        "logs/salmonIndex/salmonIndex.log"
-    conda:
-        "../envs/RNAseq.yaml"
-    shell:
-        """
-        cat {input.transcripts} {input.reference} > data/gentrome.fa.gz
-        grep "^>" <(gunzip -c {input.reference}) | cut -d " " -f 1 > data/decoys.txt
-        salmon index -t gentrome.fa.gz -i {params.idx} --decoys data/decoys.txt -k 31 2>&1 | tee -a {log}
-        rm -f data/gentrome.fa.gz data/decoys.txt
-        """
-
 rule salmon_quant:
     input:
         idx="results/index/salmon_hg19/ctable.bin",
@@ -258,6 +253,7 @@ rule salmon_quant:
         f2=gather_salmon_input2
     output:
         tc="results/salmon/{sample}/quant.sf",
+        meta="results/salmon/{sample}/aux_info/meta_info.json"
     params:
         idx="results/index/salmon_hg19/",
         dir="results/salmon/{sample}/"
@@ -272,7 +268,7 @@ rule salmon_quant:
     conda:
         "../envs/RNAseq.yaml"
     shell:
-        "salmon quant -p {threads} -i {params.idx} -l A -1 {input.f1} -2 {input.f2} --validateMappings -o {params.dir} 2>&1 | tee -a {log}"
+        "salmon quant -p {threads} -i {params.idx} -l A -1 {input.f1} -2 {input.f2} --validateMappings --rangeFactorizationBins 4 --gcBias -o {params.dir} 2>&1 | tee -a {log}"
 
 rule featureCounts:
     input:
@@ -280,7 +276,8 @@ rule featureCounts:
         gtf=config["gtf"]
     output:
         gene_counts="results/counts/featureCounts/{sample}_geneCounts.tab",
-        exon_counts="results/counts/featureCounts/{sample}_exonCounts.tab"
+        exon_counts="results/counts/featureCounts/{sample}_exonCounts.tab",
+        stats="results/qc/featureCounts/{sample}.summary"
     params:
         strand=config["fc_strand"]
     threads: config["ncpus_fc"]
@@ -291,12 +288,15 @@ rule featureCounts:
         "benchmark/featureCounts/{sample}.tsv"
     log:
         "logs/featureCounts/{sample}.log"
+    conda:
+        "../envs/RNAseq.yaml"
     script:
-        "scripts/featurecounts.R"
+        "../scripts/featureCounts.R"
 
 rule TxImport:
     input:
         quant="results/salmon/{sample}/quant.sf",
+        tx2gene="resources/tx2gene.tsv.gz",
         gtf=config["gtf"]
     output:
         gene_raw="results/counts/salmon/{sample}_geneCounts.tab",
@@ -311,8 +311,10 @@ rule TxImport:
         "benchmark/txImport/{sample}.tsv"
     log:
         "logs/txImport/{sample}.log"
+    conda:
+        "../envs/RNAseq.yaml"
     script:
-        "scripts/txImport.R"
+        "../scripts/txImport.R"
 
 rule arriba:
     input:
@@ -350,8 +352,8 @@ rule arriba:
 
 # rule STARfusion:
 #     input:
-#         bam="results/sortedBams/{sample}.Aligned.sortedByCoord.out.bam",
-#         cj="results/STAR_2p/{sample}.Chimeric.out.junction",
+#         bam="results/sortedBams/{sample}Aligned.sortedByCoord.out.bam",
+#         cj="results/STAR_2p/{sample}Chimeric.out.junction",
 #         ctat_lib="resources/ctat+lib"
 #     output:
 #         fusion="results/fusion/STAR_fusion/{sample}_star-fusion.fusion_predictions.tsv"

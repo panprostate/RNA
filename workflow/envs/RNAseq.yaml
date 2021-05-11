@@ -9,8 +9,10 @@ dependencies:
   - arriba =2.1.0
   - megadepth =1.1.0
   - samtools =1.12
+  - r =4.0.0
   - bioconductor-rsubread =2.4.3
   - bioconductor-genomicfeatures =1.42.2
   - bioconductor-tximport =1.18.0
   - gffutils =0.10.1
   - rseqc =4.0.0
+  - multiqc =1.10.1

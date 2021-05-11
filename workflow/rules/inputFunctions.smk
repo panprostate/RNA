@@ -4,7 +4,7 @@ def get_fastq(wildcards):
 def gather_SJ(wildcards):
     SAMPLES=df.loc[:,"sample_name"]
     UNITS=df.loc[:,"unit_name"]
-    return expand("results/STAR_1p/{sample}_{unit}.SJ.out.tab", zip, sample=SAMPLES, unit=UNITS)
+    return expand("results/STAR_1p/{sample}_{unit}SJ.out.tab", zip, sample=SAMPLES, unit=UNITS)
 
 def gather_bams(wildcards):
     UNITS=df.loc[wildcards.sample, "unit_name"]

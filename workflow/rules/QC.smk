@@ -3,7 +3,10 @@ rule rseqc_gtf2bed:
         gtf=config["gtf"],
     output:
         bed="results/qc/rseqc/annotation.bed",
-        db=temp("results/qc/rseqc/annotation.db"),
+        db=temp("results/qc/rseqc/annotation.db")
+    resources:
+        mem_mb=config["mem_qc"],
+        runtime_min=config["rt_qc"]
     log:
         "logs/rseqc_gtf2bed.log",
     conda:
@@ -17,8 +20,10 @@ rule rseqc_junction_annotation:
         bam="results/sortedBams/{sample}_{unit}.Aligned.sortedByCoord.out.bam",
         bed="results/qc/rseqc/annotation.bed",
     output:
-        "results/qc/rseqc/{sample}_{unit}.junctionanno.junction.bed",
-    priority: 1
+        "results/qc/rseqc/{sample}_{unit}.junctionanno.junction.bed"
+    resources:
+        mem_mb=config["mem_qc"],
+        runtime_min=config["rt_qc"]
     log:
         "logs/rseqc/rseqc_junction_annotation/{sample}_{unit}.log",
     params:
@@ -37,7 +42,9 @@ rule rseqc_junction_saturation:
         bed="results/qc/rseqc/annotation.bed",
     output:
         "results/qc/rseqc/{sample}_{unit}.junctionsat.junctionSaturation_plot.pdf",
-    priority: 1
+    resources:
+        mem_mb=config["mem_qc"],
+        runtime_min=config["rt_qc"]
     log:
         "logs/rseqc/rseqc_junction_saturation/{sample}_{unit}.log",
     params:
@@ -55,7 +62,9 @@ rule rseqc_stat:
         "results/sortedBams/{sample}_{unit}.Aligned.sortedByCoord.out.bam",
     output:
         "results/qc/rseqc/{sample}_{unit}.stats.txt",
-    priority: 1
+    resources:
+        mem_mb=config["mem_qc"],
+        runtime_min=config["rt_qc"]
     log:
         "logs/rseqc/rseqc_stat/{sample}_{unit}.log",
     conda:
@@ -70,7 +79,9 @@ rule rseqc_infer:
         bed="results/qc/rseqc/annotation.bed",
     output:
         "results/qc/rseqc/{sample}_{unit}.infer_experiment.txt",
-    priority: 1
+    resources:
+        mem_mb=config["mem_qc"],
+        runtime_min=config["rt_qc"]
     log:
         "logs/rseqc/rseqc_infer/{sample}_{unit}.log",
     conda:
@@ -85,7 +96,9 @@ rule rseqc_innerdis:
         bed="results/qc/rseqc/annotation.bed",
     output:
         "results/qc/rseqc/{sample}_{unit}.inner_distance_freq.inner_distance.txt",
-    priority: 1
+    resources:
+        mem_mb=config["mem_qc"],
+        runtime_min=config["rt_qc"]
     log:
         "logs/rseqc/rseqc_innerdis/{sample}_{unit}.log",
     params:
@@ -102,7 +115,9 @@ rule rseqc_readdis:
         bed="results/qc/rseqc/annotation.bed",
     output:
         "results/qc/rseqc/{sample}_{unit}.readdistribution.txt",
-    priority: 1
+    resources:
+        mem_mb=config["mem_qc"],
+        runtime_min=config["rt_qc"]
     log:
         "logs/rseqc/rseqc_readdis/{sample}_{unit}.log",
     conda:
@@ -116,7 +131,9 @@ rule rseqc_readdup:
         "results/sortedBams/{sample}_{unit}.Aligned.sortedByCoord.out.bam",
     output:
         "results/qc/rseqc/{sample}_{unit}.readdup.DupRate_plot.pdf",
-    priority: 1
+    resources:
+        mem_mb=config["mem_qc"],
+        runtime_min=config["rt_qc"]
     log:
         "logs/rseqc/rseqc_readdup/{sample}_{unit}.log",
     params:
@@ -132,7 +149,9 @@ rule rseqc_readgc:
         "results/sortedBams/{sample}_{unit}.Aligned.sortedByCoord.out.bam",
     output:
         "results/qc/rseqc/{sample}_{unit}.readgc.GC_plot.pdf",
-    priority: 1
+    resources:
+        mem_mb=config["mem_qc"],
+        runtime_min=config["rt_qc"]
     log:
         "logs/rseqc/rseqc_readgc/{sample}_{unit}.log",
     params:
@@ -145,19 +164,35 @@ rule rseqc_readgc:
 
 rule multiqc:
     input:
-            expand("results/sortedBams/{sample}_{unit}.Aligned.sortedByCoord.out.bam",zip, sample=samples_trim, unit=unit_trim),
-            expand("results/qc/rseqc/{sample}_{unit}.junctionanno.junction.bed",zip, sample=samples_trim, unit=unit_trim),
-            expand("results/qc/rseqc/{sample}_{unit}.junctionsat.junctionSaturation_plot.pdf",zip, sample=samples_trim, unit=unit_trim),
-            expand("results/qc/rseqc/{sample}_{unit}.infer_experiment.txt",zip, sample=samples_trim, unit=unit_trim),
-            expand("results/qc/rseqc/{sample}_{unit}.stats.txt",zip, sample=samples_trim, unit=unit_trim),
-            expand("results/qc/rseqc/{sample}_{unit}.inner_distance_freq.inner_distance.txt",zip, sample=samples_trim, unit=unit_trim),
-            expand("results/qc/rseqc/{sample}_{unit}.readdistribution.txt",zip, sample=samples_trim, unit=unit_trim),
-            expand("results/qc/rseqc/{sample}_{unit}.readdup.DupRate_plot.pdf",zip, sample=samples_trim, unit=unit_trim),
-            expand("results/qc/rseqc/{sample}_{unit}.readgc.GC_plot.pdf",zip, sample=samples_trim, unit=unit_trim),
-            expand("logs/rseqc/rseqc_junction_annotation/{sample}_{unit}.log",zip, sample=samples_trim, unit=unit_trim)
+        expand("results/sortedBams/{sample}_{unit}.Aligned.sortedByCoord.out.bam",zip, sample=samples_trim, unit=unit_trim),
+        expand("results/qc/rseqc/{sample}_{unit}.junctionanno.junction.bed",zip, sample=samples_trim, unit=unit_trim),
+        expand("results/qc/rseqc/{sample}_{unit}.junctionsat.junctionSaturation_plot.pdf",zip, sample=samples_trim, unit=unit_trim),
+        expand("results/qc/rseqc/{sample}_{unit}.infer_experiment.txt",zip, sample=samples_trim, unit=unit_trim),
+        expand("results/qc/rseqc/{sample}_{unit}.stats.txt",zip, sample=samples_trim, unit=unit_trim),
+        expand("results/qc/rseqc/{sample}_{unit}.inner_distance_freq.inner_distance.txt",zip, sample=samples_trim, unit=unit_trim),
+        expand("results/qc/rseqc/{sample}_{unit}.readdistribution.txt",zip, sample=samples_trim, unit=unit_trim),
+        expand("results/qc/rseqc/{sample}_{unit}.readdup.DupRate_plot.pdf",zip, sample=samples_trim, unit=unit_trim),
+        expand("results/qc/rseqc/{sample}_{unit}.readgc.GC_plot.pdf",zip, sample=samples_trim, unit=unit_trim),
+        expand("logs/rseqc/rseqc_junction_annotation/{sample}_{unit}.log",zip, sample=samples_trim, unit=unit_trim),
+        expand("results/qc/{sample}/{sample}_{unit}_trim.log",zip, sample=samples_trim, unit=unit_trim),
+        expand("results/STAR_2p/{sample}_{unit}Log.final.out",zip, sample=samples_trim, unit=unit_trim),
+        expand("results/qc/featureCounts/{sample}.summary", sample=SAMPLES),
+        expand("results/salmon/{sample}/aux_info/meta_info.json",sample=SAMPLES) 
     output:
         "results/qc/multiqc_report.html"
+    resources:
+        mem_mb=config["mem_qc"],
+        runtime_min=config["rt_qc"]
+    params:
+    	outDir="results/qc"
     log:
         "logs/multiqc.log",
-    wrapper:
-        "0.31.1/bio/multiqc"
+    conda:
+        "../envs/RNAseq.yaml"
+    shell:
+        "multiqc"
+        " --force"
+        " -o {params.outDir}"
+        " -n {output}"
+        " {input}"
+        " {log}"

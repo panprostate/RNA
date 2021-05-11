@@ -27,8 +27,10 @@ rule VC_create_intervalList:
     resources:
         mem_mb=4000,
         runtime_min="00:30:00"
+    conda:
+        "../envs/variantCalling.yaml"
     script:
-        "scripts/createInterval.R"
+        "../scripts/createInterval.R"
 
 rule VC_create_uBam:
     input:
@@ -47,11 +49,12 @@ rule VC_create_uBam:
         "benchmark/create_uBam/{sample}_{unit}.tsv"
     log:
         "logs/create_uBam/{sample}_{unit}.log"
+    conda:
+        "../envs/variantCalling.yaml"
     shell:
         """
-        RG= $(baseanme {input.f1} |  sed 's/\.R1.f.*//g')
-        SM= $(baseanme {input.f1} |  sed 's/_L00.*//g')
-        FastqToSam \
+        SM=$(basename {input.f1} |  sed 's/_L00.*//g')
+        gatk FastqToSam \
         -F1 {input.f1} \
         -F2 {input.f2} \
         -O {output.ubam} \
@@ -81,6 +84,8 @@ rule VC_mergeuBams:
         "benchmark/mergeBams/{sample}_{unit}.tsv"
     log:
         "logs/mergeBams/{sample}_{unit}.log"
+    conda:
+        "../envs/variantCalling.yaml"
     shell:
         """
         gatk \
@@ -99,16 +104,16 @@ rule VC_concatBam:
         bams=VC_gather_bams
     output:
         mbam="results/variantCalling/concatBam/{sample}.Aligned.sortedByCoord.out.bam"
-    threads: config["ncpus_mergeBam"]
+    threads: 2
     resources:
-        mem_mb=config["mem_mergeBam"],
-        runtime_min=config["rt_mergeBam"]
+        mem_mb=config["mem_concat"],
+        runtime_min=config["rt_concat"]
     benchmark:
         "benchmark/mergedBam/{sample}.tsv"
     log:
         "logs/mergedBam/{sample}.log"
     conda:
-        "../envs/RNAseq.yaml"
+        "../envs/variantCalling.yaml"
     shell:
         """
         INPUT=({input.bams})
@@ -205,7 +210,7 @@ rule VC_baseRecalibrator:
     shell:
         """
         gatk --java-options "-XX:GCTimeLimit=50 -XX:GCHeapFreeLimit=10 -XX:+PrintFlagsFinal \
-        -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -XX:+PrintGCDetails \
+        -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -XX:+PrintGCDetails -XX:ParallelGCThreads=1 \
         -Xloggc:gc_log.log -Xms4000m" \
         BaseRecalibrator \
         -R {input.reference} \
@@ -244,7 +249,7 @@ rule VC_applyBQSR:
         """
         gatk \
         --java-options "-XX:+PrintFlagsFinal -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps \
-        -XX:+PrintGCDetails -Xloggc:gc_log.log \
+        -XX:+PrintGCDetails -Xloggc:gc_log.log -XX:ParallelGCThreads=1 \
         -XX:GCTimeLimit=50 -XX:GCHeapFreeLimit=10 -Xms3000m" \
         ApplyBQSR \
         --add-output-sam-program-record \
@@ -279,7 +284,7 @@ rule VC_haplotypeCaller:
         "../envs/variantCalling.yaml"
     shell:
         """
-        gatk --java-options "-Xms6000m -XX:GCTimeLimit=50 -XX:GCHeapFreeLimit=10" \
+        gatk --java-options "-Xms6000m -XX:GCTimeLimit=50 -XX:GCHeapFreeLimit=10 -XX:ParallelGCThreads=1" \
         HaplotypeCaller \
         -R {input.reference} \
         -I {input.bam} \
