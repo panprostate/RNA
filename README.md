@@ -5,14 +5,14 @@ This repository contains the pipeline used by the Pan Prostate Cancer Group.
 ## **Requirements**
 All tools used in this pipeline are installed at runtime through a singularity container. The only requirements are the ones to run the Snakemake workflow.
 
+- mamba >= 1.2 (optional, for faster installation)
 - Snakemake >= 6.2
 - Singularity >=3.7 (Should work on previous versions although not tested)
 - Cookiecutter >= 1.7.2
-- mamba >= 1.2 (optional)
-- gsutils >= 4.61 (optional)
+- gsutils >= 4.61 (optional, to download the resources)
 
-With exception of Singulairty, these can be easily installed using [conda](https://docs.conda.io/en/latest/miniconda.html).
-**Please do not install Singularity through conda**. Singularity must be owned by `root` in order to run this workflow.
+With exception of Singularity, these can be easily installed using [conda](https://docs.conda.io/en/latest/miniconda.html).
+**Please do not install Singularity through conda**. Singularity must be owned by `root` in order to run this workflow. If you do not have access to a singularity installation owned by `root` [try requesting to your system administrator](https://sylabs.io/guides/3.7/user-guide/quick_start.html#installation-request). 
 
 ## **Before you begin**
 When executing snakemake, try to avoid canceling it with `ctrl + c`. If an error occurs, snakemake will clean the files from the failed step before shutting down. Forcing it to shutdown will cause corrupted files to be left behind, potentially causing troubles. 
