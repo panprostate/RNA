@@ -11,7 +11,8 @@ All tools used in this pipeline are installed at runtime through a singularity c
 - mamba >= 1.2 (optional)
 - gsutils >= 4.61 (optional)
 
-These can be easily installed using [conda](https://docs.conda.io/en/latest/miniconda.html).
+With exception of Singulairty, these can be easily installed using [conda](https://docs.conda.io/en/latest/miniconda.html).
+Please do not install Singularity through conda. Singularity must be owned by `root` in order to run this workflow.
 
 ## **How to run**
 1. Clone this github repository.
