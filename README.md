@@ -7,9 +7,11 @@ All tools used in this pipeline are installed at runtime through a singularity c
 
 - Snakemake >= 6.2
 - Singularity >=3.7 (Should work on previous versions although not tested)
-- Cookiecutter
+- Cookiecutter >= 1.7.2
 - mamba >= 1.2 (optional)
-- gsutils (optional)
+- gsutils >= 4.61 (optional)
+
+These can be easily installed using [conda](https://docs.conda.io/en/latest/miniconda.html).
 
 ## **How to run**
 1. Clone this github repository.
@@ -52,7 +54,18 @@ This file can be used to include center-specific parameters for your submissions
 "SBATCH_DEFAULTS": "partition=panda job-name={rule}_{wildcards} output=job_logs/slurm-%j.out"
 ```
 
-5. From the base directory execute Snakemake:
+5. Edit the amount of resources requested and other general settings in `config/config.yaml`. Some of the options are:
+- adapters: adapter sequences used by cutadapt.
+- mem_*: Amount of RAM memory requested for the job in MB.
+- ncpus_*: Number of cores requested for the job.
+- rt_*: Maximum time a job is allowed to run before it is killed.
+- compression: Compression level from 1 to 9 for intermediated steps. Final outputs are always compressed at the default level.
+
+
+
+
+
+6. From the base directory execute Snakemake:
 ```
 snakemake --use-conda --use-singularity --profile slurm_profile
 ```

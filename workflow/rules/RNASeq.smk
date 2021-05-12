@@ -277,7 +277,7 @@ rule featureCounts:
     output:
         gene_counts="results/counts/featureCounts/{sample}_geneCounts.tsv",
         exon_counts="results/counts/featureCounts/{sample}_exonCounts.tsv",
-        stats="results/qc/featureCounts/{sample}.summary"
+        stats="results/counts/featureCounts/{sample}_geneCounts.tsv.summary"
     params:
         strand=config["fc_strand"]
     threads: config["ncpus_fc"]

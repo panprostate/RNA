@@ -214,7 +214,7 @@ rule bamqc:
 
 rule sample_qc:
     input:
-        expand("results/qc/featureCounts/{sample}.summary", sample=SAMPLES),
+        expand("results/counts/featureCounts/{sample}_geneCounts.tsv.summary", sample=SAMPLES),
         expand("results/salmon/{sample}/aux_info/meta_info.json",sample=SAMPLES),
         expand("results/salmon/{sample}/aux_info/flenDist.txt",sample=SAMPLES) 
     output:
