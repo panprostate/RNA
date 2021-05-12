@@ -14,6 +14,25 @@ rule rseqc_gtf2bed:
     script:
         "../scripts/gtf2bed.py"
 
+rule fastqc:
+    input:
+        bam="results/sortedBams/{sample}_{unit}.Aligned.sortedByCoord.out.bam"
+    output:
+        "results/qc/fastqc/{sample}/{sample}_{unit}_fastqc.zip"
+    resources:
+        mem_mb=config["mem_qc"],
+        runtime_min=config["rt_qc"]
+    log:
+        "logs/fastqc/{sample}_{unit}.log",
+    params:
+        dir="results/qc/fastqc/{sample}/",
+    conda:
+        "../envs/RNAseq.yaml"
+    shell:
+        """
+        fastqc -o {params.dir} {input.bam}
+        mv results/qc/fastqc/{wildcards.sample}/{wildcards.sample}_{wildcards.unit}.Aligned.sortedByCoord.out_fastqc.zip {output} 
+        """
 
 rule rseqc_junction_annotation:
     input:
@@ -162,7 +181,7 @@ rule rseqc_readgc:
         "read_GC.py -i {input} -o {params.prefix} > {log} 2>&1"
 
 
-rule multiqc:
+rule bamqc:
     input:
         expand("results/sortedBams/{sample}_{unit}.Aligned.sortedByCoord.out.bam",zip, sample=samples_trim, unit=unit_trim),
         expand("results/qc/rseqc/{sample}_{unit}.junctionanno.junction.bed",zip, sample=samples_trim, unit=unit_trim),
@@ -173,26 +192,68 @@ rule multiqc:
         expand("results/qc/rseqc/{sample}_{unit}.readdistribution.txt",zip, sample=samples_trim, unit=unit_trim),
         expand("results/qc/rseqc/{sample}_{unit}.readdup.DupRate_plot.pdf",zip, sample=samples_trim, unit=unit_trim),
         expand("results/qc/rseqc/{sample}_{unit}.readgc.GC_plot.pdf",zip, sample=samples_trim, unit=unit_trim),
-        expand("logs/rseqc/rseqc_junction_annotation/{sample}_{unit}.log",zip, sample=samples_trim, unit=unit_trim),
-        expand("results/qc/{sample}/{sample}_{unit}_trim.log",zip, sample=samples_trim, unit=unit_trim),
-        expand("results/STAR_2p/{sample}_{unit}Log.final.out",zip, sample=samples_trim, unit=unit_trim),
-        expand("results/qc/featureCounts/{sample}.summary", sample=SAMPLES),
-        expand("results/salmon/{sample}/aux_info/meta_info.json",sample=SAMPLES) 
+        expand("results/STAR_2p/{sample}_{unit}Log.final.out",zip, sample=samples_trim, unit=unit_trim)
     output:
-        "results/qc/multiqc_report.html"
+        "results/qc/bam_qc.html"
     resources:
         mem_mb=config["mem_qc"],
         runtime_min=config["rt_qc"]
     params:
-    	outDir="results/qc"
+    	outDir="results/qc",
+        name="bam_qc.html"
     log:
-        "logs/multiqc.log",
+        "logs/bam_qc.log",
     conda:
         "../envs/RNAseq.yaml"
     shell:
         "multiqc"
         " --force"
         " -o {params.outDir}"
-        " -n {output}"
+        " -n {params.name}"
         " {input}"
-        " {log}"
+
+rule sample_qc:
+    input:
+        expand("results/qc/featureCounts/{sample}.summary", sample=SAMPLES),
+        expand("results/salmon/{sample}/aux_info/meta_info.json",sample=SAMPLES),
+        expand("results/salmon/{sample}/aux_info/flenDist.txt",sample=SAMPLES) 
+    output:
+        "results/qc/samples_qc.html"
+    resources:
+        mem_mb=config["mem_qc"],
+        runtime_min=config["rt_qc"]
+    params:
+    	outDir="results/qc",
+        name="samples_qc.html"
+    log:
+        "logs/samples_qc.log",
+    conda:
+        "../envs/RNAseq.yaml"
+    shell:
+        "multiqc"
+        " --force"
+        " -o {params.outDir}"
+        " -n {params.name}"
+        " {input}"
+
+rule reads_qc:
+    input:
+        expand("results/qc/fastqc/{sample}/{sample}_{unit}_fastqc.zip",zip, sample=samples_trim, unit=unit_trim)
+    output:
+        "results/qc/reads_qc.html"
+    resources:
+        mem_mb=config["mem_qc"],
+        runtime_min=config["rt_qc"]
+    params:
+    	outDir="results/qc",
+        name="reads_qc.html"
+    log:
+        "logs/read_qc.log",
+    conda:
+        "../envs/RNAseq.yaml"
+    shell:
+        "multiqc"
+        " --force"
+        " -o {params.outDir}"
+        " -n {params.name}"
+        " {input}"

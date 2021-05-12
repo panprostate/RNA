@@ -106,7 +106,7 @@ rule star_1pass:
         STAR \
         --genomeDir {params.idx} \
         --readFilesIn {input.f1} {input.f2} \
-        --runThreadN 8 \
+        --runThreadN {threads} \
         --readFilesCommand zcat \
         --outFilterMultimapScoreRange 1 \
         --outFilterMultimapNmax 20 \
@@ -162,7 +162,7 @@ rule star_2pass:
         STAR \
         --genomeDir {params.idx} \
         --readFilesIn {input.f1} {input.f2} \
-        --runThreadN 8 \
+        --runThreadN {threads} \
         --readFilesCommand zcat \
         --outBAMcompression {params.compression} \
         --outFilterMultimapScoreRange 1 \
@@ -212,7 +212,7 @@ rule sortBam:
         "../envs/RNAseq.yaml"
     shell:
         """
-        samtools sort -@ {threads} -m 2G {input.bam} -o {output.sbam} 2>>{log}
+        samtools sort -@ {threads} -m 1G {input.bam} -o {output.sbam} 2>>{log}
         samtools index {output.sbam}
         """
 
@@ -275,8 +275,8 @@ rule featureCounts:
         bam="results/mergedBam/{sample}.Aligned.sortedByCoord.out.bam",
         gtf=config["gtf"]
     output:
-        gene_counts="results/counts/featureCounts/{sample}_geneCounts.tab",
-        exon_counts="results/counts/featureCounts/{sample}_exonCounts.tab",
+        gene_counts="results/counts/featureCounts/{sample}_geneCounts.tsv",
+        exon_counts="results/counts/featureCounts/{sample}_exonCounts.tsv",
         stats="results/qc/featureCounts/{sample}.summary"
     params:
         strand=config["fc_strand"]
@@ -290,8 +290,11 @@ rule featureCounts:
         "logs/featureCounts/{sample}.log"
     conda:
         "../envs/RNAseq.yaml"
-    script:
-        "../scripts/featureCounts.R"
+    shell:
+        """
+        featureCounts -p -a {input.gtf} -T {threads} -t exon -g gene_id -o {output.gene_counts} {input.bam}
+        featureCounts -p -f -a {input.gtf} -T {threads} -t exon -g gene_id -o {output.exon_counts} {input.bam}
+        """
 
 rule TxImport:
     input:
@@ -299,10 +302,10 @@ rule TxImport:
         tx2gene="resources/tx2gene.tsv.gz",
         gtf=config["gtf"]
     output:
-        gene_raw="results/counts/salmon/{sample}_geneCounts.tab",
-        gene_scaled="results/counts/salmon/{sample}_geneCounts_scaled.tab",
-        transcript_raw="results/counts/salmon/{sample}_transcriptCounts.tab",
-        transcript_TPM="results/counts/salmon/{sample}_transcriptTPM.tab"
+        gene_raw="results/counts/salmon/{sample}_geneCounts.tsv",
+        gene_scaled="results/counts/salmon/{sample}_geneCounts_scaled.tsv",
+        transcript_raw="results/counts/salmon/{sample}_transcriptCounts.tsv",
+        transcript_TPM="results/counts/salmon/{sample}_transcriptTPM.tsv"
     threads: 2
     resources:
         mem_mb=config["mem_txi"],
@@ -379,7 +382,7 @@ rule megadepth:
         bed=config["paSites"],
         bam="results/mergedBam/{sample}.Aligned.sortedByCoord.out.bam"
     output:
-        paQuant="results/paQuant/{sample}_paQuant.tab"
+        paQuant="results/paQuant/{sample}_paQuant.tsv"
     conda:
         "../envs/RNAseq.yaml"
     shell:

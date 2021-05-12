@@ -129,7 +129,7 @@ rule VC_markDuplicates:
         bam="results/variantCalling/concatBam/{sample}.Aligned.sortedByCoord.out.bam"
     output:
         dedup=temp("results/variantCalling/markDuplicates/{sample}.bam"),
-        index=temp("results/variantCalling/markDuplicates/{sample}.bam.bai"),
+        index=temp("results/variantCalling/markDuplicates/{sample}.bai"),
         metrics="results/variantCalling/metrics/{sample}_dedup.metrics"
     params:
         compression=config["compression_level"]
@@ -148,10 +148,10 @@ rule VC_markDuplicates:
         gatk \
         MarkDuplicates \
         --INPUT {input.bam} \
-        --OUTPUT {output.dedup} \
         --CREATE_INDEX true \
         --VALIDATION_STRINGENCY SILENT \
         --METRICS_FILE output.metrics \
+        --OUTPUT {output.dedup} \
         --COMPRESSION_LEVEL {params.compression} 2>> {log}
         """
 
@@ -163,7 +163,7 @@ rule VC_splitNCigars:
         bam="results/variantCalling/markDuplicates/{sample}.bam"
     output:
         sacr=temp("results/variantCalling/splitNCigars/{sample}.bam"),
-        index=temp("results/variantCalling/splitNCigars/{sample}.bam.bai")
+        index=temp("results/variantCalling/splitNCigars/{sample}.bai")
     params:
         compression=config["compression_level"]
     threads: 2
@@ -182,8 +182,7 @@ rule VC_splitNCigars:
         SplitNCigarReads \
         -R {input.reference} \
         -I {input.bam} \
-        -O {output.sacr} \
-        --COMPRESSION_LEVEL {params.compression} 2>> {log}
+        -O {output.sacr} {log}
         """
 
 rule VC_baseRecalibrator:
@@ -192,7 +191,7 @@ rule VC_baseRecalibrator:
         refDict=config["dict"],
         refIndex=config["faidx"],
         bam="results/variantCalling/splitNCigars/{sample}.bam",
-        bai="results/variantCalling/splitNCigars/{sample}.bam.bai",
+        bai="results/variantCalling/splitNCigars/{sample}.bai",
         dbSNP=config["dbSNP"],
         knowIndels=config["knowIndels"]
     output:
@@ -227,7 +226,7 @@ rule VC_applyBQSR:
         refDict=config["dict"],
         refIndex=config["faidx"],
         bam="results/variantCalling/splitNCigars/{sample}.bam",
-        bai="results/variantCalling/splitNCigars/{sample}.bam.bai",
+        bai="results/variantCalling/splitNCigars/{sample}.bai",
         table="results/variantCalling/recalibration/{sample}.tbl"
     output:
         recalbam="results/variantCalling/recalibration/{sample}.bam",
@@ -257,8 +256,7 @@ rule VC_applyBQSR:
         -I {input.bam} \
         --use-original-qualities \
         -O {output.recalbam} \
-        --bqsr-recal-file {output.report} \
-        --COMPRESSION_LEVEL {params.compression} 2>> {log}
+        --bqsr-recal-file {input.table} 2>> {log}
         """
 
 rule VC_haplotypeCaller:
@@ -267,7 +265,7 @@ rule VC_haplotypeCaller:
         refDict=config["dict"],
         refIndex=config["faidx"],
         bam="results/variantCalling/recalibration/{sample}.bam",
-        bai="results/variantCalling/recalibration/{sample}.bam.bai",
+        bai="results/variantCalling/recalibration/{sample}.bai",
         dbSNP=config["dbSNP"],
         intervals="results/variantCalling/intervalList/exons.interval_list"
     output:

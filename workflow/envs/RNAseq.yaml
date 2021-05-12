@@ -10,8 +10,8 @@ dependencies:
   - megadepth =1.1.0
   - samtools =1.12
   - r =4.0.0
-  - bioconductor-rsubread =2.4.3
-  - bioconductor-genomicfeatures =1.42.2
+  - subread =2.0.1
+  - fastqc =0.11.9
   - bioconductor-tximport =1.18.0
   - gffutils =0.10.1
   - rseqc =4.0.0
