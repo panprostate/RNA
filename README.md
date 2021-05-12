@@ -12,7 +12,11 @@ All tools used in this pipeline are installed at runtime through a singularity c
 - gsutils >= 4.61 (optional)
 
 With exception of Singulairty, these can be easily installed using [conda](https://docs.conda.io/en/latest/miniconda.html).
-Please do not install Singularity through conda. Singularity must be owned by `root` in order to run this workflow.
+**Please do not install Singularity through conda**. Singularity must be owned by `root` in order to run this workflow.
+
+## **Before you begin**
+When executing snakemake, try to avoid canceling it with `ctrl + c`. If an error occurs, snakemake will clean the files from the failed step before shutting down. Forcing it to shutdown will cause corrupted files to be left behind, potentially causing troubles. 
+On the same note, avoid moving/creating/removing files under the `results/` folder. Snakemake relies on the time stamp of the files to coordinate the order of execution of each step. If you must remove files, only remove files resulting from the last step ran, otherwise this will cause snakemake to reprocess all steps that relies on these files.
 
 ## **How to run**
 1. Clone this github repository.
@@ -71,9 +75,9 @@ This file can be used to include center-specific parameters for your submissions
 snakemake --use-conda --use-singularity --profile slurm_profile
 ```
 
-The workflow will automatically pull and create a Singularity container from `docker://condaforge/mambaforge:4.10.1-0` and install the necessary packages for each enviroment.
+The workflow will automatically pull and create a Singularity container from `docker://condaforge/mambaforge:4.10.1-0` and create environments with the necessary packages for each module.
 
 # **Workflow overview**
-Assuming a sample named `S1` which has been split in two files by lane.
+Assuming a sample named `S1` which has been split in two files by lane (`L001` and `L002`).
 
 ![overview](https://github.com/panprostate/RNA/blob/master/workflow-schematics.jpg?raw=true)
