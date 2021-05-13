@@ -67,7 +67,7 @@ mem_txi: 4000
 rt_txi: "04:00:00"
 
 # arriba
-mem_arriba: 8000
+mem_arriba: 20000
 rt_arriba: "04:00:00"
 
 # STAR-fusion

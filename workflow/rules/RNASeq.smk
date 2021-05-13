@@ -330,7 +330,7 @@ rule arriba:
     output:
         fusion="results/fusion/arriba/{sample}.tsv",
         discarded="results/fusion/arriba/{sample}_discarded.tsv.gz"
-    threads: 2
+    threads: 1
     resources:
         mem_mb=config["mem_arriba"],
         runtime_min=config["rt_arriba"]
