@@ -329,7 +329,7 @@ rule arriba:
         pd="resources/protein_domains_hg19_hs37d5_GRCh37_v2.1.0.gff3"
     output:
         fusion="results/fusion/arriba/{sample}.tsv",
-        discarded="results/fusion/arriba/{sample}_discarded.tsv"
+        discarded="results/fusion/arriba/{sample}_discarded.tsv.gz"
     threads: 2
     resources:
         mem_mb=config["mem_arriba"],
@@ -350,7 +350,9 @@ rule arriba:
         -k {input.kf} \
         -t {input.kf} \
         -p {input.pd} \
-        -o {output.fusion} -O {output.discarded} 2>&1 | tee -a {log}
+        -o {output.fusion} -O discarded 2>&1 | tee -a {log}
+        gzip -9 -c discarded > {output.discarded}
+        rm -f discarded
         """
 
 # rule STARfusion:
