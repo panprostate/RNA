@@ -1,8 +1,8 @@
 # rule VC_create_dictIndex:
 #     input:
-#         reference=config["reference"]
+#         reference="resources/Homo_sapiens_assembly19_1000genomes_decoy.fasta"
 #     output:
-#         refDict=config["dict"]
+#         refDict="resources/Homo_sapiens_assembly19_1000genomes_decoy.dict"
 #         fai="resources/genome.fai"
 #     threads: 2
 #     resources:
@@ -19,7 +19,7 @@
 rule VC_create_intervalList:
     input:
         gtf=config["gtf"],
-        refDict=config["dict"]
+        refDict="resources/Homo_sapiens_assembly19_1000genomes_decoy.dict"
     output:
         tmp=temp("results/variantCalling/intervalList/exome.bed"),
         intervals="results/variantCalling/intervalList/exons.interval_list"
@@ -67,9 +67,9 @@ rule VC_create_uBam:
 
 rule VC_mergeuBams:
     input:
-        reference=config["reference"],
-        refDict=config["dict"],
-        refIndex=config["faidx"],
+        reference="resources/Homo_sapiens_assembly19_1000genomes_decoy.fasta",
+        refDict="resources/Homo_sapiens_assembly19_1000genomes_decoy.dict",
+        refIndex="resources/Homo_sapiens_assembly19_1000genomes_decoy.fasta.fai",
         ubam="results/variantCalling/ubams/{sample}_{unit}.ubam",
         bam="results/sortedBams/{sample}_{unit}.Aligned.sortedByCoord.out.bam"
     output:
@@ -157,9 +157,9 @@ rule VC_markDuplicates:
 
 rule VC_splitNCigars:
     input:
-        reference=config["reference"],
-        refDict=config["dict"],
-        refIndex=config["faidx"],
+        reference="resources/Homo_sapiens_assembly19_1000genomes_decoy.fasta",
+        refDict="resources/Homo_sapiens_assembly19_1000genomes_decoy.dict",
+        refIndex="resources/Homo_sapiens_assembly19_1000genomes_decoy.fasta.fai",
         bam="results/variantCalling/markDuplicates/{sample}.bam"
     output:
         sacr=temp("results/variantCalling/splitNCigars/{sample}.bam"),
@@ -187,13 +187,13 @@ rule VC_splitNCigars:
 
 rule VC_baseRecalibrator:
     input:
-        reference=config["reference"],
-        refDict=config["dict"],
-        refIndex=config["faidx"],
+        reference="resources/Homo_sapiens_assembly19_1000genomes_decoy.fasta",
+        refDict="resources/Homo_sapiens_assembly19_1000genomes_decoy.dict",
+        refIndex="resources/Homo_sapiens_assembly19_1000genomes_decoy.fasta.fai",
         bam="results/variantCalling/splitNCigars/{sample}.bam",
         bai="results/variantCalling/splitNCigars/{sample}.bai",
-        dbSNP=config["dbSNP"],
-        knowIndels=config["knowIndels"]
+        dbSNP="resources/Homo_sapiens_assembly19_1000genomes_decoy.dbsnp138.vcf",
+        knowIndels="resources/Mills_and_1000G_gold_standard.indels.b37.sites.vcf"
     output:
         table="results/variantCalling/recalibration/{sample}.tbl"
     threads: 2
@@ -222,9 +222,9 @@ rule VC_baseRecalibrator:
 
 rule VC_applyBQSR:
     input:
-        reference=config["reference"],
-        refDict=config["dict"],
-        refIndex=config["faidx"],
+        reference="resources/Homo_sapiens_assembly19_1000genomes_decoy.fasta",
+        refDict="resources/Homo_sapiens_assembly19_1000genomes_decoy.dict",
+        refIndex="resources/Homo_sapiens_assembly19_1000genomes_decoy.fasta.fai",
         bam="results/variantCalling/splitNCigars/{sample}.bam",
         bai="results/variantCalling/splitNCigars/{sample}.bai",
         table="results/variantCalling/recalibration/{sample}.tbl"
@@ -261,12 +261,12 @@ rule VC_applyBQSR:
 
 rule VC_haplotypeCaller:
     input:
-        reference=config["reference"],
-        refDict=config["dict"],
-        refIndex=config["faidx"],
+        reference="resources/Homo_sapiens_assembly19_1000genomes_decoy.fasta",
+        refDict="resources/Homo_sapiens_assembly19_1000genomes_decoy.dict",
+        refIndex="resources/Homo_sapiens_assembly19_1000genomes_decoy.fasta.fai",
         bam="results/variantCalling/recalibration/{sample}.bam",
         bai="results/variantCalling/recalibration/{sample}.bai",
-        dbSNP=config["dbSNP"],
+        dbSNP="resources/Homo_sapiens_assembly19_1000genomes_decoy.dbsnp138.vcf",
         intervals="results/variantCalling/intervalList/exons.interval_list"
     output:
         vcf=temp("results/variantCalling/vcf/{sample}.vcf.gz")
@@ -295,9 +295,9 @@ rule VC_haplotypeCaller:
 
 rule VC_filterVCF:
     input:
-        reference=config["reference"],
-        refDict=config["dict"],
-        refIndex=config["faidx"],
+        reference="resources/Homo_sapiens_assembly19_1000genomes_decoy.fasta",
+        refDict="resources/Homo_sapiens_assembly19_1000genomes_decoy.dict",
+        refIndex="resources/Homo_sapiens_assembly19_1000genomes_decoy.fasta.fai",
         vcf="results/variantCalling/vcf/{sample}.vcf.gz"
     output:
         vcf_f="results/variantCalling/vcf_filtered/{sample}.vcf.gz",

@@ -1,5 +1,5 @@
 {
-    "SBATCH_DEFAULTS": "partition=panda job-name={rule}_{wildcards} output=job_logs/slurm-%j.out",
+    "SBATCH_DEFAULTS": "job-name={rule}_{wildcards} output=job_logs/slurm-%j.out",
     "CLUSTER_NAME": "",
     "CLUSTER_CONFIG": "",
     "ADVANCED_ARGUMENT_CONVERSION": "no"

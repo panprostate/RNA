@@ -1,6 +1,6 @@
 rule rseqc_gtf2bed:
     input:
-        gtf=config["gtf"],
+        gtf="resources/gencode.v38lift37.annotation.gtf",
     output:
         bed="results/qc/rseqc/annotation.bed",
         db=temp("results/qc/rseqc/annotation.db")
@@ -214,7 +214,8 @@ rule bamqc:
 
 rule sample_qc:
     input:
-        expand("results/counts/featureCounts/{sample}_geneCounts.tsv.summary", sample=SAMPLES),
+        expand("results/counts/featureCounts/{sample}_geneCounts_gencode.tsv.summary", sample=SAMPLES),
+        expand("results/counts/featureCounts/{sample}_geneCounts_fc.tsv.summary", sample=SAMPLES),
         expand("results/salmon/{sample}/aux_info/meta_info.json",sample=SAMPLES),
         expand("results/salmon/{sample}/aux_info/flenDist.txt",sample=SAMPLES) 
     output:

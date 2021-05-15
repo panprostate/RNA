@@ -17,5 +17,5 @@ matScaled <- txiScaled$counts
 colnames(mat) <- nms
 colnames(matScaled) <- nms
 
-write.csv(mat, file=snakemake@output[["gene_raw"]], row.names = T, col.names = T)
-write.csv(matScaled, file=snakemake@output[["gene_scaled"]], row.names = T, col.names = T)
+write.table(mat, file=snakemake@output[["gene_raw"]], row.names = T, col.names = T, sep = "\t")
+write.table(matScaled, file=snakemake@output[["gene_scaled"]], row.names = T, col.names = T, sep="\t")

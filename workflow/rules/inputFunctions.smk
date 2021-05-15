@@ -1,3 +1,15 @@
+def star_index(wildcards):
+    if config["buildIndex"] == True:
+        return "results/index/STARindex_hg19/SA"
+    else:
+        return "resources/STARindex_hg19/SA"
+
+def salmon_index(wildcards):
+    if config["buildIndex"] == True:
+        return "results/index/salmon_hg19/ctable.bin"
+    else:
+        return "resources/salmon_hg19/ctable.bin"
+
 def get_fastq(wildcards):
     return df.loc[(wildcards.sample, wildcards.unit), ["fq1", "fq2"]]
 
@@ -10,6 +22,12 @@ def gather_bams(wildcards):
     UNITS=df.loc[wildcards.sample, "unit_name"]
     bams=expand("results/sortedBams/{sample}_{unit}.Aligned.sortedByCoord.out.bam", unit=UNITS, sample=wildcards.sample)
     return bams
+
+def gather_chims(wildcards):
+    UNITS = df.loc[wildcards.sample, "unit_name"]
+    bams = expand(
+        "results/STAR_2p/{sample}_{unit}Chimeric.out.junction", unit=UNITS, sample=wildcards.sample)
+    return chims
 
 def gather_salmon_input1(wildcards):
     UNITS=df.loc[wildcards.sample, "unit_name"]

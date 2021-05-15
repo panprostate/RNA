@@ -18,6 +18,7 @@ rule trim:
         "logs/trimqc/{sample}_{unit}.log"
     conda:
         "../envs/RNAseq.yaml"
+    priority: 1
     shell:
         "cutadapt"
         " {params.adapters}"
@@ -28,14 +29,14 @@ rule trim:
         " -j {threads}"
         " {input} > {output.qc} 2>>{log}"
 
-rule star_index:
+rule star_index_build:
     input:
-        reference=config["reference"],
-        gtf=config["gtf"]
+        reference="resources/Homo_sapiens_assembly19_1000genomes_decoy.fasta",
+        gtf="resources/gencode.v38lift37.annotation.gtf"
     output:
-        index="results/index/hg19/SA"
+        index="results/index/STARindex_hg19/SA"
     params:
-        idx="results/index/hg19/"
+        idx="results/index/STARindex_hg19/"
     threads: config["ncpus_STAR_index"]
     resources:
         mem_mb=config["mem_STAR_index"],
@@ -46,6 +47,7 @@ rule star_index:
         "logs/STARindex/STARindex.log"
     conda:
         "../envs/RNAseq.yaml"
+    priority: 2
     shell:
         "STAR"
         " --runMode genomeGenerate"
@@ -55,10 +57,10 @@ rule star_index:
         " --sjdbGTFfile {input.gtf}"
         " --runThreadN {threads} 2>&1 | tee -a {log}"
 
-rule salmon_index:
+rule salmon_index_build:
     input:
-        transcripts=config["transcripts"],
-        reference=config["reference"]
+        transcripts="resources/gencode.v38lift37.transcripts.fa",
+        reference="resources/Homo_sapiens_assembly19_1000genomes_decoy.fasta"
     output:
         "results/index/salmon_hg19/ctable.bin"
     params:
@@ -73,8 +75,10 @@ rule salmon_index:
         "logs/salmonIndex/salmonIndex.log"
     conda:
         "../envs/RNAseq.yaml"
+    priority: 2
     shell:
         """
+        set -e
         cat {input.transcripts} {input.reference} > resources/gentrome.fa
         grep "^>" {input.reference} | cut -d " " -f 1 > resources/decoys.txt
         sed -i -e 's/>//g' resources/decoys.txt
@@ -84,13 +88,14 @@ rule salmon_index:
 
 rule star_1pass:
     input:
-        index="results/index/hg19/SA",
+        index=star_index,
         f1="results/trim/{sample}/{sample}_{unit}_R1_trimmed.fastq.gz",
         f2="results/trim/{sample}/{sample}_{unit}_R2_trimmed.fastq.gz"
     output:
-        SJ=temp(multiext("results/STAR_1p/{sample}_{unit}", "SJ.out.tab", "Log.progress.out", "Chimeric.out.junction", "Log.final.out", "Log.out"))
+        SJ="results/STAR_1p/{sample}_{unit}SJ.out.tab",
+        outputs=temp(multiext("results/STAR_1p/{sample}_{unit}", "Log.progress.out", "Log.final.out", "Log.out"))
     params:
-        idx="results/index/hg19"
+        idx=lambda wildcards, input: input.index[:-2]
     threads: config["ncpus_STAR_align"]
     resources:
         mem_mb=config["mem_STAR_align"],
@@ -101,6 +106,7 @@ rule star_1pass:
         "logs/STAR_1p/{sample}_{unit}.log"
     conda:
         "../envs/RNAseq.yaml"
+    priority: 1
     shell:
         """
         STAR \
@@ -111,25 +117,20 @@ rule star_1pass:
         --outFilterMultimapScoreRange 1 \
         --outFilterMultimapNmax 20 \
         --outFilterMismatchNmax 10 \
+        --outFilterType BySJout \
         --alignIntronMax 500000 \
+        --alignIntronMin 20 \
         --alignMatesGapMax 1000000 \
         --sjdbScore 2 \
         --alignSJDBoverhangMin 5 \
         --genomeLoad NoSharedMemory \
-        --outFilterMatchNminOverLread 0.33 \
-        --outFilterScoreMinOverLread 0.33 \
+        --outFilterMatchNminOverLread 0.1 \
+        --outFilterScoreMinOverLread 0.1 \
         --sjdbOverhang 250 \
         --outSAMstrandField intronMotif \
         --peOverlapNbasesMin 10 \
         --alignSplicedMateMapLminOverLmate 0.5 \
         --alignSJstitchMismatchNmax 5 -1 5 5 \
-        --chimSegmentMin 10 \
-        --chimJunctionOverhangMin 10 \
-        --chimScoreDropMax 30 \
-        --chimScoreJunctionNonGTAG 0 \
-        --chimScoreSeparation 1 \
-        --chimSegmentReadGapMax 3 \
-        --chimMultimapNmax 20 \
         --outSAMtype None \
         --outSAMmode None \
         --outFileNamePrefix results/STAR_1p/{wildcards.sample}_{wildcards.unit} 2>&1 | tee -a {log}
@@ -139,14 +140,14 @@ rule star_2pass:
     input:
         f1="results/trim/{sample}/{sample}_{unit}_R1_trimmed.fastq.gz",
         f2="results/trim/{sample}/{sample}_{unit}_R2_trimmed.fastq.gz",
-        index="results/index/hg19/SA",
+        index=star_index,
         SJ=gather_SJ
     output:
         bam=temp("results/STAR_2p/{sample}_{unit}Aligned.out.bam"),
         star_logs=multiext("results/STAR_2p/{sample}_{unit}", "SJ.out.tab", "Log.final.out", "Log.out", "Chimeric.out.junction")
     params:
         compression=config["compression_level"],
-        idx="results/index/hg19"
+        idx=lambda wildcards, input: input.index[:-2]
     threads: config["ncpus_STAR_align"]
     resources:
         mem_mb=config["mem_STAR_align"],
@@ -157,6 +158,7 @@ rule star_2pass:
         "logs/STAR_2p/{sample}_{unit}.log"
     conda:
         "../envs/RNAseq.yaml"
+    priority: 1
     shell:
         """
         STAR \
@@ -165,24 +167,27 @@ rule star_2pass:
         --runThreadN {threads} \
         --readFilesCommand zcat \
         --outBAMcompression {params.compression} \
+        --outFilterType BySJout \
         --outFilterMultimapScoreRange 1 \
         --outFilterMultimapNmax 20 \
         --outFilterMismatchNmax 10 \
         --alignIntronMax 500000 \
+        --alignIntronMin 20 \
         --alignMatesGapMax 1000000 \
         --sjdbScore 2 \
         --outSAMtype BAM Unsorted \
         --alignSJDBoverhangMin 5 \
         --genomeLoad NoSharedMemory \
         --sjdbFileChrStartEnd {input.SJ} \
-        --outFilterMatchNminOverLread 0.33 \
-        --outFilterScoreMinOverLread 0.33 \
+        --outFilterMatchNminOverLread 0.1 \
+        --outFilterScoreMinOverLread 0.1 \
         --sjdbOverhang 250 \
         --outSAMstrandField intronMotif \
         --peOverlapNbasesMin 10 \
         --alignSplicedMateMapLminOverLmate 0.5 \
         --alignSJstitchMismatchNmax 5 -1 5 5 \
         --chimSegmentMin 10 \
+        --chimOutJunctionFormat 1 \
         --chimOutType Junctions WithinBAM HardClip \
         --chimJunctionOverhangMin 10 \
         --chimScoreDropMax 30 \
@@ -210,6 +215,7 @@ rule sortBam:
         "logs/sortBam/{sample}_{unit}.log"
     conda:
         "../envs/RNAseq.yaml"
+    priority: 1
     shell:
         """
         samtools sort -@ {threads} -m 1G {input.bam} -o {output.sbam} 2>>{log}
@@ -218,10 +224,12 @@ rule sortBam:
 
 rule mergeBam:
     input:
-        bams=gather_bams
+        bams=gather_bams,
+        chims=gather_chims
     output:
         mbam="results/mergedBam/{sample}.Aligned.sortedByCoord.out.bam",
-        bai="results/mergedBam/{sample}.Aligned.sortedByCoord.out.bam.bai"
+        bai="results/mergedBam/{sample}.Aligned.sortedByCoord.out.bam.bai",
+        chim="results/mergedBam/{sample}Chimeric.out.junction"
     params:
         bams=gather_bams
     threads: config["ncpus_mergeBam"]
@@ -234,8 +242,10 @@ rule mergeBam:
         "logs/mergedBam/{sample}.log"
     conda:
         "../envs/RNAseq.yaml"
+    priority: 1
     shell:
         """
+        set -e
         INPUT=({input.bams})
         if ((${{#INPUT[@]}} == 1)); then
             cp {input.bams} {output.mbam}
@@ -244,18 +254,28 @@ rule mergeBam:
             samtools merge -f -1 {output.mbam} {input.bams} 2>>{log}
             samtools index {output.mbam}
         fi
+        # Also merge the chimeric files for star-fusion
+        cat {input.chims[0]} | tail -n +2 > {output.chim}
+        for $i in ({input.chims[1:]}); do
+            cat $1 | tail -n +2 | head -n -2 >> results/mergedBam/{wildcards.sample}chims
+            cat $1 | tail -n 1 >> results/mergedBam/{wildcards.sample}counts
+        done
+        cat results/mergedBam/{wildcards.sample}chims >> {output.chim}
+        cat {input.chims[0]} | tail -n 2 |head -n 1 >> {output.chim}
+        awk -F' ' '{Nreads+=$3; NreadsUnique+=$5; NreadsMulti+=$7}END{print "# Nreads " Nreads "\t" "NreadsUnique " NreadsUnique "\t" "NreadsMulti " NreadsMulti}' results/mergedBam/{wildcards.sample}counts >> {output.chim}
+        rm -f results/mergedBam/{wildcards.sample}chims results/mergedBam/{wildcards.sample}counts
         """
 
 rule salmon_quant:
     input:
-        idx="results/index/salmon_hg19/ctable.bin",
+        index=salmon_index,
         f1=gather_salmon_input1,
         f2=gather_salmon_input2
     output:
         tc="results/salmon/{sample}/quant.sf",
         meta="results/salmon/{sample}/aux_info/meta_info.json"
     params:
-        idx="results/index/salmon_hg19/",
+        idx=lambda wildcards, input: input.index[:-10]
         dir="results/salmon/{sample}/"
     threads: config["ncpus_salmonQuant"]
     resources:
@@ -267,17 +287,22 @@ rule salmon_quant:
         "logs/salmonQuant/{sample}.log"
     conda:
         "../envs/RNAseq.yaml"
+    priority: 1
     shell:
         "salmon quant -p {threads} -i {params.idx} -l A -1 {input.f1} -2 {input.f2} --validateMappings --rangeFactorizationBins 4 --gcBias -o {params.dir} 2>&1 | tee -a {log}"
 
 rule featureCounts:
     input:
         bam="results/mergedBam/{sample}.Aligned.sortedByCoord.out.bam",
-        gtf=config["gtf"]
+        gtf="resources/gencode.v38lift37.annotation.gtf",
+        fc="resouces/FANTOM_CAT.lv3_robust.gtf"
     output:
-        gene_counts="results/counts/featureCounts/{sample}_geneCounts.tsv",
-        exon_counts="results/counts/featureCounts/{sample}_exonCounts.tsv",
-        stats="results/counts/featureCounts/{sample}_geneCounts.tsv.summary"
+        gene_counts="results/counts/featureCounts/{sample}_geneCounts_gencode.tsv",
+        exon_counts="results/counts/featureCounts/{sample}_exonCounts_gencode.tsv",
+        stats="results/counts/featureCounts/{sample}_geneCounts_gencode.tsv.summary",
+        gene_counts_fc = "results/counts/featureCounts/{sample}_geneCounts_fc.tsv",
+        exon_counts_fc = "results/counts/featureCounts/{sample}_exonCounts_fc.tsv",
+        stats_fc = "results/counts/featureCounts/{sample}_geneCounts_fc.tsv.summary"
     params:
         strand=config["fc_strand"]
     threads: config["ncpus_fc"]
@@ -290,17 +315,20 @@ rule featureCounts:
         "logs/featureCounts/{sample}.log"
     conda:
         "../envs/RNAseq.yaml"
+    priority: 1
     shell:
         """
         featureCounts -p -a {input.gtf} -T {threads} -t exon -g gene_id -o {output.gene_counts} {input.bam}
+        featureCounts -p -a {input.fc} -T {threads} -t exon -g gene_id -o {output.gene_counts_fc} {input.bam}
         featureCounts -p -f -a {input.gtf} -T {threads} -t exon -g gene_id -o {output.exon_counts} {input.bam}
+        featureCounts -p -f -a {input.fc} -T {threads} -t exon -g gene_id -o {output.exon_counts_fc} {input.bam}
         """
 
 rule TxImport:
     input:
         quant="results/salmon/{sample}/quant.sf",
         tx2gene="resources/tx2gene.tsv.gz",
-        gtf=config["gtf"]
+        gtf="resources/gencode.v38lift37.annotation.gtf"
     output:
         gene_raw="results/counts/salmon/{sample}_geneCounts.tsv",
         gene_scaled="results/counts/salmon/{sample}_geneCounts_scaled.tsv",
@@ -316,14 +344,15 @@ rule TxImport:
         "logs/txImport/{sample}.log"
     conda:
         "../envs/RNAseq.yaml"
+    priority: 1
     script:
         "../scripts/txImport.R"
 
 rule arriba:
     input:
         bam="results/mergedBam/{sample}.Aligned.sortedByCoord.out.bam",
-        reference=config["reference"],
-        gtf=config["gtf"],
+        reference="resources/Homo_sapiens_assembly19_1000genomes_decoy.fasta",
+        gtf="resources/gencode.v38lift37.annotation.gtf",
         bl="resources/blacklist_hg19_hs37d5_GRCh37_v2.1.0.tsv.gz",
         kf="resources/known_fusions_hg19_hs37d5_GRCh37_v2.1.0.tsv.gz",
         pd="resources/protein_domains_hg19_hs37d5_GRCh37_v2.1.0.gff3"
@@ -340,6 +369,7 @@ rule arriba:
         "logs/arriba/{sample}.log"
     conda:
         "../envs/RNAseq.yaml"
+    priority: 1
     shell:
         """
         arriba \
@@ -355,37 +385,40 @@ rule arriba:
         rm -f discarded
         """
 
-# rule STARfusion:
-#     input:
-#         bam="results/sortedBams/{sample}Aligned.sortedByCoord.out.bam",
-#         cj="results/STAR_2p/{sample}Chimeric.out.junction",
-#         ctat_lib="resources/ctat+lib"
-#     output:
-#         fusion="results/fusion/STAR_fusion/{sample}_star-fusion.fusion_predictions.tsv"
-#     threads: config["ncpus_STARfusion"]
-#     resources:
-#         mem_mb=config["mem_STARfusion"],
-#         runtime_min=config["rt_STARfusion"]
-#     benchmark:
-#         "benchmark/STARfusion/{sample}.tsv"
-#     log:
-#         "logs/STARfusion/{sample}.log"
-#     conda:
-#         "../envs/RNAseq.yaml"
-#     shell:
-#         """
-#         STAR-Fusion --genome_lib_dir {input.ctat_lib} \
-#         -J {input.cj} \
-#         --output_dir fusion/STAR_fusion/{wildcards.sample}_
-#         """
+rule STARfusion:
+    input:
+        cj="results/mergedBam/{sample}Chimeric.out.junction",
+        ctat_lib = "resources/GRCh37_gencode_v19_CTAT_lib_Mar012021.plug-n-play/ctat_genome_lib_build_dir/ref_genome.fa"
+    output:
+        fusion="results/fusion/STAR_fusion/{sample}_star-fusion.fusion_predictions.tsv"
+    params:
+        ctat_path="resources/GRCh37_gencode_v19_CTAT_lib_Mar012021.plug-n-play/"
+    threads: config["ncpus_STARfusion"]
+    resources:
+        mem_mb=config["mem_STARfusion"],
+        runtime_min=config["rt_STARfusion"]
+    benchmark:
+        "benchmark/STARfusion/{sample}.tsv"
+    log:
+        "logs/STARfusion/{sample}.log"
+    conda:
+        "../envs/RNAseq.yaml"
+    priority: 1
+    shell:
+        """
+        STAR-Fusion --genome_lib_dir {params.ctat_path} \
+        -J {input.cj} \
+        --output_dir results/fusion/STAR_fusion/{wildcards.sample}_
+        """
 
 rule megadepth:
     input:
-        bed=config["paSites"],
+        bed = "resources/pasites_hg19.bed.gz",
         bam="results/mergedBam/{sample}.Aligned.sortedByCoord.out.bam"
     output:
-        paQuant="results/paQuant/{sample}_paQuant.tsv"
+        paQuant="results/paQuant/{sample}_paQuant.tsv.gz"
     conda:
         "../envs/RNAseq.yaml"
+    priority: 1
     shell:
-        "megadepth {input.bam} --annotation {input.bed} --op sum > {output.paQuant}"
+        "megadepth {input.bam} --annotation {input.bed} --gzip --op sum > {output.paQuant}"

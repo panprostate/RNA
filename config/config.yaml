@@ -1,25 +1,19 @@
+################################################################################
+# GENERAL SETTINGS
+################################################################################
+# Sample metadata table
 samples: "config/samples.tsv"
+# Build indexes from scratch? True to build and False to download built indexes
+buildIndex: False
+# Overall compression level for all temporary files values accepted are from 1 (lower compression) to 9 (higher compression)
+compression_level: 4
+
 ################################################################################
-# RESOURCES CONFIGURATION
-################################################################################
-reference: "resources/Homo_sapiens_assembly19_1000genomes_decoy.fasta"
-dict: "resources/Homo_sapiens_assembly19_1000genomes_decoy.dict"
-faidx: "resources/Homo_sapiens_assembly19_1000genomes_decoy.fasta.fai"
-transcripts: "resources/gencode.v38lift37.transcripts.fa"
-gtf: "resources/gencode.v38lift37.annotation.gtf"
-paSites: "resources/pasites_hg19.bed"
-blacklist: "resources/blacklist_hg19_hs37d5_GRCh37_v2.1.0.tsv.gz"
-knowFusions: "resources/known_fusions_hg19_hs37d5_GRCh37_v2.1.0.tsv.gz"
-proteinDomains: "resources/protein_domains_hg19_hs37d5_GRCh37_v2.1.0.gff3"
-dbSNP: "resources/Homo_sapiens_assembly19_1000genomes_decoy.dbsnp138.vcf"
-knowIndels: "resources/Mills_and_1000G_gold_standard.indels.b37.sites.vcf"
-################################################################################
+# JOBS SETTINGS
 # ncpus_* = Number of threads to allocate for the job
 # mem_* = Amount of memory in MB to allocate for the job
 # rt_* = Max runtime the job is allow to run before it is killed
 ################################################################################
-# Overall compression level for all temporary files values accepted are from 1 (lower compression) to 9 (higher compression)
-compression_level: 4
 # Trimming and Quality Control
 adapters: "-a AGATCGGAAGAGCACACGTCTGAACTCCAGTCA -A AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT"
 ncpus_trim: 4
@@ -32,7 +26,7 @@ mem_STAR_index: 52000
 rt_STAR_index: "08:00:00"
 
 # STAR Align
-ncpus_STAR_align: 4
+ncpus_STAR_align: 8
 mem_STAR_align: 40000
 rt_STAR_align: "04:00:00"
 
@@ -72,7 +66,7 @@ rt_arriba: "04:00:00"
 
 # STAR-fusion
 ncpus_STARfusion: 2
-mem_STARfusion: 8000
+mem_STARfusion: 4000
 rt_STARfusion: "04:00:00"
 
 #RSeQC
