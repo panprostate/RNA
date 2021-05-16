@@ -210,7 +210,7 @@ rule VC_baseRecalibrator:
         """
         gatk --java-options "-XX:GCTimeLimit=50 -XX:GCHeapFreeLimit=10 -XX:+PrintFlagsFinal \
         -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -XX:+PrintGCDetails -XX:ParallelGCThreads=1 \
-        -Xloggc:gc_log.log -Xms4000m" \
+        -Xms4000m" \
         BaseRecalibrator \
         -R {input.reference} \
         -I {input.bam} \
@@ -247,7 +247,7 @@ rule VC_applyBQSR:
         """
         gatk \
         --java-options "-XX:+PrintFlagsFinal -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps \
-        -XX:+PrintGCDetails -Xloggc:gc_log.log -XX:ParallelGCThreads=1 \
+        -XX:+PrintGCDetails -XX:ParallelGCThreads=1 \
         -XX:GCTimeLimit=50 -XX:GCHeapFreeLimit=10 -Xms3000m" \
         ApplyBQSR \
         --add-output-sam-program-record \
