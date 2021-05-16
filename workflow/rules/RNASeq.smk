@@ -218,7 +218,7 @@ rule sortBam:
     priority: 1
     shell:
         """
-        samtools sort -@ {threads} -m 1G {input.bam} -o {output.sbam} 2>>{log}
+        samtools sort -@ {threads} {input.bam} -o {output.sbam} 2>>{log}
         samtools index {output.sbam}
         """
 
@@ -255,16 +255,22 @@ rule mergeBam:
             samtools index {output.mbam}
         fi
         # Also merge the chimeric files for star-fusion
-        cat {input.chims[0]} | tail -n +2 > {output.chim}
-        for $i in ({input.chims[1:]}); do
-            cat $1 | tail -n +2 | head -n -2 >> results/mergedBam/{wildcards.sample}chims
-            cat $1 | tail -n 1 >> results/mergedBam/{wildcards.sample}counts
+        cat {input.chims[0]} | head -n -2 > {output.chim}
+        files=({input.chims})
+        unset files[0]
+        files=("${{files[@]}}")
+        rm -f results/mergedBam/{wildcards.sample}chims results/mergedBam/{wildcards.sample}counts
+        touch results/mergedBam/{wildcards.sample}chims
+        cat {input.chims[0]} | tail -n 1 > results/mergedBam/{wildcards.sample}counts
+        for file in $files; do
+            cat $file | tail -n +2 | head -n -2 >> results/mergedBam/{wildcards.sample}chims
+            cat $file | tail -n 1 >> results/mergedBam/{wildcards.sample}counts
         done
         cat results/mergedBam/{wildcards.sample}chims >> {output.chim}
         cat {input.chims[0]} | tail -n 2 |head -n 1 >> {output.chim}
-        awk -F' ' '{Nreads+=$3; NreadsUnique+=$5; NreadsMulti+=$7}END{print "# Nreads " Nreads "\t" "NreadsUnique " NreadsUnique "\t" "NreadsMulti " NreadsMulti}' results/mergedBam/{wildcards.sample}counts >> {output.chim}
+        awk -F' ' '{{Nreads+=$3; NreadsUnique+=$5; NreadsMulti+=$7}}END{{print "# Nreads " Nreads "\t" "NreadsUnique " NreadsUnique "\t" "NreadsMulti " NreadsMulti}}' results/mergedBam/{wildcards.sample}counts >> {output.chim}
         rm -f results/mergedBam/{wildcards.sample}chims results/mergedBam/{wildcards.sample}counts
-        """
+            """
 
 rule salmon_quant:
     input:
@@ -273,9 +279,10 @@ rule salmon_quant:
         f2=gather_salmon_input2
     output:
         tc="results/salmon/{sample}/quant.sf",
+        flen="results/salmon/{sample}/libParams/flenDist.txt",
         meta="results/salmon/{sample}/aux_info/meta_info.json"
     params:
-        idx=lambda wildcards, input: input.index[:-10]
+        idx=lambda wildcards, input: input.index[:-10],
         dir="results/salmon/{sample}/"
     threads: config["ncpus_salmonQuant"]
     resources:
@@ -295,7 +302,7 @@ rule featureCounts:
     input:
         bam="results/mergedBam/{sample}.Aligned.sortedByCoord.out.bam",
         gtf="resources/gencode.v38lift37.annotation.gtf",
-        fc="resouces/FANTOM_CAT.lv3_robust.gtf"
+        fc="resources/FANTOM_CAT.lv3_robust.gtf"
     output:
         gene_counts="results/counts/featureCounts/{sample}_geneCounts_gencode.tsv",
         exon_counts="results/counts/featureCounts/{sample}_exonCounts_gencode.tsv",
@@ -390,9 +397,9 @@ rule STARfusion:
         cj="results/mergedBam/{sample}Chimeric.out.junction",
         ctat_lib = "resources/GRCh37_gencode_v19_CTAT_lib_Mar012021.plug-n-play/ctat_genome_lib_build_dir/ref_genome.fa"
     output:
-        fusion="results/fusion/STAR_fusion/{sample}_star-fusion.fusion_predictions.tsv"
+        fusion="results/fusion/STAR_fusion/{sample}/star-fusion.fusion_predictions.tsv"
     params:
-        ctat_path="resources/GRCh37_gencode_v19_CTAT_lib_Mar012021.plug-n-play/"
+        ctat_path = "resources/GRCh37_gencode_v19_CTAT_lib_Mar012021.plug-n-play/ctat_genome_lib_build_dir"
     threads: config["ncpus_STARfusion"]
     resources:
         mem_mb=config["mem_STARfusion"],
@@ -402,13 +409,13 @@ rule STARfusion:
     log:
         "logs/STARfusion/{sample}.log"
     conda:
-        "../envs/RNAseq.yaml"
+        "../envs/STARfusion.yaml"
     priority: 1
     shell:
         """
         STAR-Fusion --genome_lib_dir {params.ctat_path} \
         -J {input.cj} \
-        --output_dir results/fusion/STAR_fusion/{wildcards.sample}_
+        --output_dir results/fusion/STAR_fusion/{wildcards.sample}
         """
 
 rule megadepth:

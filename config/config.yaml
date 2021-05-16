@@ -27,12 +27,12 @@ rt_STAR_index: "08:00:00"
 
 # STAR Align
 ncpus_STAR_align: 8
-mem_STAR_align: 40000
+mem_STAR_align: 45000
 rt_STAR_align: "04:00:00"
 
-# Sort Bam (please note that max mem per thread is set to 2GB, do not allocate less than ncpus*2000Mb of RAM)
+# Sort Bam 
 ncpus_sortBam: 4
-mem_sortBam: 10000
+mem_sortBam: 4000
 rt_sortBam: "08:00:00"
 
 # Merge Bam
@@ -43,12 +43,12 @@ rt_mergeBam: "08:00:00"
 # Salmon Index
 ncpus_salmonIndex: 8
 mem_salmonIndex: 25000
-rt_salmonIndex: "04:00:00"
+rt_salmonIndex: "08:00:00"
 
 # Salmon quant
 ncpus_salmonQuant: 8
 mem_salmonQuant: 25000
-rt_salmonQuant: "04:00:00"
+rt_salmonQuant: "08:00:00"
 
 # FeatureCounts
 ncpus_fc: 2
@@ -61,7 +61,7 @@ mem_txi: 4000
 rt_txi: "04:00:00"
 
 # arriba
-mem_arriba: 20000
+mem_arriba: 8000
 rt_arriba: "04:00:00"
 
 # STAR-fusion
@@ -81,13 +81,13 @@ mem_mergeBams: 4000
 rt_mergeBams: "04:00:00"
 mem_concat: 2000
 rt_concat: "04:00:00"
-mem_markDuplicates: 8000
+mem_markDuplicates: 12000
 rt_markDuplicates: "08:00:00"
 mem_splitNCigars: 8000
 rt_splitNCigars: "04:00:00"
-mem_baseRecalibrator: 8000
+mem_baseRecalibrator: 10000
 rt_baseRecalibrator: "08:00:00"
 mem_applyBQSR: 8000
 rt_applyBQSR: "12:00:00"
-mem_haplotypeCaller: 8000
-rt_haplotypeCaller: "12:00:00"
+mem_haplotypeCaller: 10000
+rt_haplotypeCaller: "24:00:00"

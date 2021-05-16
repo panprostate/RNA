@@ -1,0 +1,6 @@
+channels:
+  - bioconda
+  - conda-forge
+dependencies:
+  - snakemake-minimal >=6.2.1
+  - star-fusion =1.10

@@ -25,8 +25,7 @@ def gather_bams(wildcards):
 
 def gather_chims(wildcards):
     UNITS = df.loc[wildcards.sample, "unit_name"]
-    bams = expand(
-        "results/STAR_2p/{sample}_{unit}Chimeric.out.junction", unit=UNITS, sample=wildcards.sample)
+    chims = expand("results/STAR_2p/{sample}_{unit}Chimeric.out.junction", unit=UNITS, sample=wildcards.sample)
     return chims
 
 def gather_salmon_input1(wildcards):

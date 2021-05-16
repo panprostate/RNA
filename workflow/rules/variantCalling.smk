@@ -18,7 +18,7 @@
 
 rule VC_create_intervalList:
     input:
-        gtf=config["gtf"],
+        gtf="resources/gencode.v38lift37.annotation.gtf",
         refDict="resources/Homo_sapiens_assembly19_1000genomes_decoy.dict"
     output:
         tmp=temp("results/variantCalling/intervalList/exome.bed"),
@@ -150,7 +150,7 @@ rule VC_markDuplicates:
         --INPUT {input.bam} \
         --CREATE_INDEX true \
         --VALIDATION_STRINGENCY SILENT \
-        --METRICS_FILE output.metrics \
+        --METRICS_FILE {output.metrics} \
         --OUTPUT {output.dedup} \
         --COMPRESSION_LEVEL {params.compression} 2>> {log}
         """
@@ -182,7 +182,7 @@ rule VC_splitNCigars:
         SplitNCigarReads \
         -R {input.reference} \
         -I {input.bam} \
-        -O {output.sacr} {log}
+        -O {output.sacr} 2>> {log}
         """
 
 rule VC_baseRecalibrator:
@@ -230,8 +230,7 @@ rule VC_applyBQSR:
         table="results/variantCalling/recalibration/{sample}.tbl"
     output:
         recalbam="results/variantCalling/recalibration/{sample}.bam",
-        bai="results/variantCalling/recalibration/{sample}.bam.bai",
-        report="results/variantCalling/metrics/{sample}_recalibration.metrics"
+        bai="results/variantCalling/recalibration/{sample}.bai"
     params:
         compression=config["compression_level"]
     threads: 2

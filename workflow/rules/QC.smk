@@ -8,7 +8,7 @@ rule rseqc_gtf2bed:
         mem_mb=config["mem_qc"],
         runtime_min=config["rt_qc"]
     log:
-        "logs/rseqc_gtf2bed.log",
+        "logs/rseqc/rseqc_gtf2bed.log",
     conda:
         "../envs/RNAseq.yaml"
     script:
@@ -217,7 +217,7 @@ rule sample_qc:
         expand("results/counts/featureCounts/{sample}_geneCounts_gencode.tsv.summary", sample=SAMPLES),
         expand("results/counts/featureCounts/{sample}_geneCounts_fc.tsv.summary", sample=SAMPLES),
         expand("results/salmon/{sample}/aux_info/meta_info.json",sample=SAMPLES),
-        expand("results/salmon/{sample}/aux_info/flenDist.txt",sample=SAMPLES) 
+        expand("results/salmon/{sample}/libParams/flenDist.txt",sample=SAMPLES) 
     output:
         "results/qc/samples_qc.html"
     resources:
