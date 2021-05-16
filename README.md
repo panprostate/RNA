@@ -57,6 +57,7 @@ This file can be used to include center-specific parameters for your submissions
 ```
 
 4. Edit the amount of resources requested and other general settings in `config/config.yaml`. Some of the options are:
+- samples: path to the metadata table described in step 2.
 - buildIndex: True or False wether to build indexes from files or download built indexes.
 - adapters: adapter sequences used by cutadapt.
 - mem_*: Amount of RAM memory requested for the job in MB.
