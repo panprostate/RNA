@@ -9,7 +9,7 @@ All tools used in this pipeline are installed at runtime through a singularity c
 - Snakemake >= 6.2
 - Singularity >=3.7 (Should work on previous versions although not tested)
 - Cookiecutter >= 1.7.2
-- gsutils >= 4.61 (optional, to download the resources)
+
 
 With exception of Singularity, these can be easily installed using [conda](https://docs.conda.io/en/latest/miniconda.html).
 **Please do not install Singularity through conda**. 
@@ -35,13 +35,7 @@ git clone https://github.com/panprostate/RNA.git
 Create this table under the `config/` folder.
 As reference, a helper script `createTable.sh` is included under `config/` to create this table. Make sure the table format is correct before proceding.
 
-3. Download the required resources.
-```
-cd <path-to-cloned-direct>/resources
-sh downloadResources.sh
-```
-
-4. If your computing enviroment is managed by Slurm, a cluster profile is included at `slurm_profile/`. There are two files that can be adjusted:
+3. If your computing enviroment is managed by Slurm, a cluster profile is included at `slurm_profile/`. There are two files that can be adjusted:
 - `slurm_profile/config.yaml`
 
 Most likely you will want to adjust only two settings in this file:
@@ -61,18 +55,15 @@ This file can be used to include center-specific parameters for your submissions
 "SBATCH_DEFAULTS": "partition=panda job-name={rule}_{wildcards} output=job_logs/slurm-%j.out"
 ```
 
-5. Edit the amount of resources requested and other general settings in `config/config.yaml`. Some of the options are:
+4. Edit the amount of resources requested and other general settings in `config/config.yaml`. Some of the options are:
+- buildIndex: True or False wether to build indexes from files or download built indexes.
 - adapters: adapter sequences used by cutadapt.
 - mem_*: Amount of RAM memory requested for the job in MB.
 - ncpus_*: Number of cores requested for the job.
 - rt_*: Maximum time a job is allowed to run before it is killed.
 - compression: Compression level from 1 to 9 for intermediated steps. Final outputs are always compressed at the default level.
 
-
-
-
-
-6. From the base directory execute Snakemake:
+5. From the base directory execute Snakemake:
 ```
 snakemake --use-conda --use-singularity --profile slurm_profile
 ```
