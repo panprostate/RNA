@@ -23,8 +23,8 @@ On the same note, avoid moving/creating/removing files under the `results/` fold
 ## **How to run**
 1. Download the snakemake workflow.
 ```
-wget https://github.com/panprostate/RNA/releases/download/v1.0.1-beta/ppcgrna_v1.0.1-beta.tar.gz
-tar -xzvf ppcgrna_v1.0.1-beta.tar.gz
+wget https://github.com/panprostate/RNA/releases/download/v1.0.1-beta/PPCG_RNA_v1.0.2-beta.tar.gz
+tar -xzvf PPCG_RNA_v1.0.2-beta.tar.gz
 ```
 
 2. This workflow requires a sample metadata table (tab separated) containing the following fields:
