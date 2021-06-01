@@ -7,7 +7,7 @@ rule download_resources:
         tx2gene="resources/tx2gene.tsv.gz",
         gtf="resources/gencode.v38lift37.annotation.gtf",
         paSites="resources/pasites_hg19.bed",
-        fc="resouces/FANTOM_CAT.lv3_robust.gtf",
+        fc="resources/FANTOM_CAT.lv3_robust.gtf",
         blacklist="resources/blacklist_hg19_hs37d5_GRCh37_v2.1.0.tsv.gz",
         knowFusions="resources/known_fusions_hg19_hs37d5_GRCh37_v2.1.0.tsv.gz",
         proteinDomains="resources/protein_domains_hg19_hs37d5_GRCh37_v2.1.0.gff3",
