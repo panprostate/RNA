@@ -420,7 +420,7 @@ rule STARfusion:
 
 rule megadepth:
     input:
-        bed = "resources/pasites_hg19.bed.gz",
+        bed = "resources/pasites_hg19.bed",
         bam="results/mergedBam/{sample}.Aligned.sortedByCoord.out.bam"
     output:
         paQuant="results/paQuant/{sample}_paQuant.tsv.gz"
