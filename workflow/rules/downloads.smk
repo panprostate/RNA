@@ -53,7 +53,7 @@ rule download_resources:
 
 rule star_index_download:
     output:
-        index = "resources/STAR_hg19/SA"
+        index = "resources/STARindex_hg19/SA"
     priority: 3
     threads: 1
     resources:
@@ -66,7 +66,7 @@ rule star_index_download:
     shell:
         """
         set -e
-        wget -O resources/STARindex_hg19 https://www.dropbox.com/s/ckxiowyrzc48cio/STARindex_hg19.tar?dl=0
+        wget -O resources/STARindex_hg19 https://www.dropbox.com/s/7zf1ad0hokpizfi/STARindex_hg19.tar
         tar -xvf resources/STARindex_hg19 --directory resources/
         """
 
@@ -85,7 +85,7 @@ rule salmon_index_download:
     shell:
         """
         set -e
-        wget -O resources/salmon_hg19.tar https://www.dropbox.com/s/7m1jjfcmbysar0m/salmon_hg19.tar
+        wget -O resources/salmon_hg19.tar https://www.dropbox.com/s/mybii6z71v9pt57/salmon_hg19.tar
         tar -xvf resources/salmon_hg19.tar --directory resources/
         """
 

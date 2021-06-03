@@ -1,0 +1,5 @@
+sample_name	unit_name	fq1	fq2
+A001_S3	L001	/athena/marchionnilab/scratch/lab_data/sharedData/PPCG_test/A001_S3_L001_R1_001.fastq.gz	/athena/marchionnilab/scratch/lab_data/sharedData/PPCG_test/A001_S3_L001_R2_001.fastq.gz
+A001_S3	L002	/athena/marchionnilab/scratch/lab_data/sharedData/PPCG_test/A001_S3_L002_R1_001.fastq.gz	/athena/marchionnilab/scratch/lab_data/sharedData/PPCG_test/A001_S3_L002_R2_001.fastq.gz
+A002_S87	L001	/athena/marchionnilab/scratch/lab_data/sharedData/PPCG_test/A002_S87_L001_R1_001.fastq.gz	/athena/marchionnilab/scratch/lab_data/sharedData/PPCG_test/A002_S87_L001_R2_001.fastq.gz
+A002_S87	L002	/athena/marchionnilab/scratch/lab_data/sharedData/PPCG_test/A002_S87_L002_R1_001.fastq.gz	/athena/marchionnilab/scratch/lab_data/sharedData/PPCG_test/A002_S87_L002_R2_001.fastq.gz
