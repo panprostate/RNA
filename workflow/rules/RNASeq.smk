@@ -250,27 +250,28 @@ rule mergeBam:
         if ((${{#INPUT[@]}} == 1)); then
             cp {input.bams} {output.mbam}
             cp {input.bams}.bai {output.mbam}.bai
+            cp {input.chims} {output.chim}
         else
             samtools merge -f -1 {output.mbam} {input.bams} 2>>{log}
             samtools index {output.mbam}
+            # Also merge the chimeric files for star-fusion
+            cat {input.chims[0]} | head -n -2 > {output.chim}
+            files=({input.chims})
+            unset files[0]
+            files=("${{files[@]}}")
+            rm -f results/mergedBam/{wildcards.sample}chims results/mergedBam/{wildcards.sample}counts
+            touch results/mergedBam/{wildcards.sample}chims
+            cat {input.chims[0]} | tail -n 1 > results/mergedBam/{wildcards.sample}counts
+            for file in $files; do
+                cat $file | tail -n +2 | head -n -2 >> results/mergedBam/{wildcards.sample}chims
+                cat $file | tail -n 1 >> results/mergedBam/{wildcards.sample}counts
+            done
+            cat results/mergedBam/{wildcards.sample}chims >> {output.chim}
+            cat {input.chims[0]} | tail -n 2 |head -n 1 >> {output.chim}
+            awk -F' ' '{{Nreads+=$3; NreadsUnique+=$5; NreadsMulti+=$7}}END{{print "# Nreads " Nreads "\t" "NreadsUnique " NreadsUnique "\t" "NreadsMulti " NreadsMulti}}' results/mergedBam/{wildcards.sample}counts >> {output.chim}
+            rm -f results/mergedBam/{wildcards.sample}chims results/mergedBam/{wildcards.sample}counts
         fi
-        # Also merge the chimeric files for star-fusion
-        cat {input.chims[0]} | head -n -2 > {output.chim}
-        files=({input.chims})
-        unset files[0]
-        files=("${{files[@]}}")
-        rm -f results/mergedBam/{wildcards.sample}chims results/mergedBam/{wildcards.sample}counts
-        touch results/mergedBam/{wildcards.sample}chims
-        cat {input.chims[0]} | tail -n 1 > results/mergedBam/{wildcards.sample}counts
-        for file in $files; do
-            cat $file | tail -n +2 | head -n -2 >> results/mergedBam/{wildcards.sample}chims
-            cat $file | tail -n 1 >> results/mergedBam/{wildcards.sample}counts
-        done
-        cat results/mergedBam/{wildcards.sample}chims >> {output.chim}
-        cat {input.chims[0]} | tail -n 2 |head -n 1 >> {output.chim}
-        awk -F' ' '{{Nreads+=$3; NreadsUnique+=$5; NreadsMulti+=$7}}END{{print "# Nreads " Nreads "\t" "NreadsUnique " NreadsUnique "\t" "NreadsMulti " NreadsMulti}}' results/mergedBam/{wildcards.sample}counts >> {output.chim}
-        rm -f results/mergedBam/{wildcards.sample}chims results/mergedBam/{wildcards.sample}counts
-            """
+        """
 
 rule salmon_quant:
     input:
