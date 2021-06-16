@@ -39,6 +39,7 @@ rule VC_create_uBam:
     output:
         ubam="results/variantCalling/ubams/{sample}_{unit}.ubam"
     params:
+        tmp_dir=config["tmp_dir"],
         compression=config["compression_level"],
         RG="{sample}"
     threads: 2
@@ -61,6 +62,7 @@ rule VC_create_uBam:
         -RG {params.RG} \
         -SM $SM \
         -PL illumina \
+        --TMP_DIR {params.tmp_dir} \
         --COMPRESSION_LEVEL {params.compression} 2>> {log}
         """
 
@@ -75,6 +77,7 @@ rule VC_mergeuBams:
     output:
         merged=temp("results/variantCalling/mergedBam/{sample}_{unit}.bam")
     params:
+        tmp_dir=config["tmp_dir"],
         compression=config["compression_level"]
     threads: 2
     resources:
@@ -96,6 +99,7 @@ rule VC_mergeuBams:
         --OUTPUT {output.merged} \
         --INCLUDE_SECONDARY_ALIGNMENTS false \
         --VALIDATION_STRINGENCY SILENT \
+        --TMP_DIR {params.tmp_dir} \
         --COMPRESSION_LEVEL {params.compression} 2>> {log}
         """
 
@@ -128,10 +132,12 @@ rule VC_markDuplicates:
     input:
         bam="results/variantCalling/concatBam/{sample}.Aligned.sortedByCoord.out.bam"
     output:
+        
         dedup=temp("results/variantCalling/markDuplicates/{sample}.bam"),
         index=temp("results/variantCalling/markDuplicates/{sample}.bai"),
         metrics="results/variantCalling/metrics/{sample}_dedup.metrics"
     params:
+        tmp_dir=config["tmp_dir"],
         compression=config["compression_level"]
     threads: 2
     resources:
@@ -152,6 +158,7 @@ rule VC_markDuplicates:
         --VALIDATION_STRINGENCY SILENT \
         --METRICS_FILE {output.metrics} \
         --OUTPUT {output.dedup} \
+        --TMP_DIR {params.tmp_dir} \
         --COMPRESSION_LEVEL {params.compression} 2>> {log}
         """
 
@@ -165,6 +172,7 @@ rule VC_splitNCigars:
         sacr=temp("results/variantCalling/splitNCigars/{sample}.bam"),
         index=temp("results/variantCalling/splitNCigars/{sample}.bai")
     params:
+        tmp_dir=config["tmp_dir"],
         compression=config["compression_level"]
     threads: 2
     resources:
@@ -182,6 +190,7 @@ rule VC_splitNCigars:
         SplitNCigarReads \
         -R {input.reference} \
         -I {input.bam} \
+        --TMP_DIR {params.tmp_dir} \
         -O {output.sacr} 2>> {log}
         """
 
@@ -196,6 +205,8 @@ rule VC_baseRecalibrator:
         knowIndels="resources/Mills_and_1000G_gold_standard.indels.b37.sites.vcf"
     output:
         table="results/variantCalling/recalibration/{sample}.tbl"
+    params:
+        tmp_dir=config["tmp_dir"]
     threads: 2
     resources:
         mem_mb=config["mem_baseRecalibrator"],
@@ -216,6 +227,7 @@ rule VC_baseRecalibrator:
         -I {input.bam} \
         --use-original-qualities \
         -O {output.table} \
+        --TMP_DIR {params.tmp_dir} \
         -known-sites {input.dbSNP} \
         -known-sites {input.knowIndels} 2>> {log}
         """
@@ -232,6 +244,7 @@ rule VC_applyBQSR:
         recalbam="results/variantCalling/recalibration/{sample}.bam",
         bai="results/variantCalling/recalibration/{sample}.bai"
     params:
+        tmp_dir=config["tmp_dir"],
         compression=config["compression_level"]
     threads: 2
     resources:
@@ -253,6 +266,7 @@ rule VC_applyBQSR:
         --add-output-sam-program-record \
         -R {input.reference} \
         -I {input.bam} \
+        --TMP_DIR {params.tmp_dir} \
         --use-original-qualities \
         -O {output.recalbam} \
         --bqsr-recal-file {input.table} 2>> {log}
@@ -269,6 +283,8 @@ rule VC_haplotypeCaller:
         intervals="results/variantCalling/intervalList/exons.interval_list"
     output:
         vcf=temp("results/variantCalling/vcf/{sample}.vcf.gz")
+    params:
+        tmp_dir=config["tmp_dir"]
     threads: 2
     resources:
         mem_mb=config["mem_haplotypeCaller"],
@@ -286,6 +302,7 @@ rule VC_haplotypeCaller:
         -R {input.reference} \
         -I {input.bam} \
         -L {input.intervals} \
+        --TMP_DIR {params.tmp_dir} \
         -O {output.vcf} \
         -dont-use-soft-clipped-bases \
         --standard-min-confidence-threshold-for-calling 20 \
@@ -301,6 +318,8 @@ rule VC_filterVCF:
     output:
         vcf_f="results/variantCalling/vcf_filtered/{sample}.vcf.gz",
         vcfIdx="results/variantCalling/vcf_filtered/{sample}.vcf.gz.tbi"
+    params: 
+        tmp_dir=config["tmp_dir"]
     threads: 2
     resources:
         mem_mb=config["mem_haplotypeCaller"],
@@ -317,6 +336,7 @@ rule VC_filterVCF:
         VariantFiltration \
         --R {input.reference} \
         --V {input.vcf} \
+        --TMP_DIR {params.tmp_dir} \
         --window 35 \
         --cluster 3 \
         --filter-name "FS" \
