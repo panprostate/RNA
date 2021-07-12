@@ -388,9 +388,9 @@ rule arriba:
         -k {input.kf} \
         -t {input.kf} \
         -p {input.pd} \
-        -o {output.fusion} -O discarded 2>&1 | tee -a {log}
-        gzip -9 -c discarded > {output.discarded}
-        rm -f discarded
+        -o {output.fusion} -O results/fusion/arriba/{wildcards.sample}_discarded.tsv 2>&1 | tee -a {log}
+        gzip -9 -c results/fusion/arriba/{wildcards.sample}_discarded.tsv > {output.discarded}
+        rm -f results/fusion/arriba/{wildcards.sample}_discarded.tsv
         """
 
 rule STARfusion:
