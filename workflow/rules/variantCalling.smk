@@ -132,7 +132,6 @@ rule VC_markDuplicates:
     input:
         bam="results/variantCalling/concatBam/{sample}.Aligned.sortedByCoord.out.bam"
     output:
-        
         dedup=temp("results/variantCalling/markDuplicates/{sample}.bam"),
         index=temp("results/variantCalling/markDuplicates/{sample}.bai"),
         metrics="results/variantCalling/metrics/{sample}_dedup.metrics"
