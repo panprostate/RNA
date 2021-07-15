@@ -12,5 +12,5 @@ wget http://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_38/GRCh37_
 wget http://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_38/GRCh37_mapping/gencode.v38lift37.transcripts.fa.gz
 echo "Unzipping some files..."
 gunzip gencode.v38lift37.annotation.gtf.gz gencode.v38lift37.transcripts.fa.gz
-sed -i 's/^chr//g' gencode.v38lift37.annotation.gtf
+sed -i -e 's/^chrM/MT/' -e 's/^chr//g' gencode.v38lift37.annotation.gtf
 echo "Done!"
