@@ -414,7 +414,8 @@ rule STARfusion:
     priority: 1
     shell:
         """
-        Rscript workflow/scripts/fixChim.R {input.cj}
+        workflow/scripts/fixChim.awk < {input.cj} > {input.cj}.fix
+        mv -f {input.cj}.fix {input.cj}
         STAR-Fusion --genome_lib_dir {params.ctat_path} \
         -J {input.cj} \
         --output_dir results/fusion/STAR_fusion/{wildcards.sample}
