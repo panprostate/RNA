@@ -62,7 +62,7 @@ rule VC_create_uBam:
         -RG {params.RG} \
         -SM $SM \
         -PL illumina \
-        --tmp-dir {params.tmp_dir} \
+        --TMP_DIR {params.tmp_dir} \
         --COMPRESSION_LEVEL {params.compression} 2>> {log}
         """
 
@@ -99,7 +99,7 @@ rule VC_mergeuBams:
         --OUTPUT {output.merged} \
         --INCLUDE_SECONDARY_ALIGNMENTS false \
         --VALIDATION_STRINGENCY SILENT \
-        --tmp-dir {params.tmp_dir} \
+        --TMP_DIR {params.tmp_dir} \
         --COMPRESSION_LEVEL {params.compression} 2>> {log}
         """
 
@@ -132,7 +132,6 @@ rule VC_markDuplicates:
     input:
         bam="results/variantCalling/concatBam/{sample}.Aligned.sortedByCoord.out.bam"
     output:
-        
         dedup=temp("results/variantCalling/markDuplicates/{sample}.bam"),
         index=temp("results/variantCalling/markDuplicates/{sample}.bai"),
         metrics="results/variantCalling/metrics/{sample}_dedup.metrics"
@@ -158,7 +157,7 @@ rule VC_markDuplicates:
         --VALIDATION_STRINGENCY SILENT \
         --METRICS_FILE {output.metrics} \
         --OUTPUT {output.dedup} \
-        --tmp-dir {params.tmp_dir} \
+        --TMP_DIR {params.tmp_dir} \
         --COMPRESSION_LEVEL {params.compression} 2>> {log}
         """
 
