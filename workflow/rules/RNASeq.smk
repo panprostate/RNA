@@ -1,4 +1,4 @@
-rule trim:
+rule trim_PE:
     input:
         get_fastq
     output:
@@ -26,6 +26,35 @@ rule trim:
         " --compression-level {params.compression}"
         " -o {output.fastq1}"
         " -p {output.fastq2}"
+        " -j {threads}"
+        " {input} > {output.qc} 2>>{log}"
+
+rule trim_SE:
+    input:
+        get_fastq
+    output:
+        fastq1=temp("results/trim/SE/{sample}/{sample}_{unit}_R1_trimmed.fastq.gz"),
+        qc="results/qc/{sample}/{sample}_{unit}_trim.log"
+    params:
+        adapters=config["adapters"],
+        compression=config["compression_level"]
+    threads: config["ncpus_trim"]
+    resources:
+        mem_mb=config["mem_trim"],
+        runtime_min=config["rt_trim"]
+    benchmark:
+        "benchmark/trimqc/{sample}_{unit}.tsv"
+    log:
+        "logs/trimqc/{sample}_{unit}.log"
+    conda:
+        "../envs/RNAseq.yaml"
+    priority: 1
+    shell:
+        "cutadapt"
+        " {params.adapters}"
+        " -m 31"
+        " --compression-level {params.compression}"
+        " -o {output.fastq1}"
         " -j {threads}"
         " {input} > {output.qc} 2>>{log}"
 
@@ -86,7 +115,7 @@ rule salmon_index_build:
         rm -f resources/gentrome.fa resources/decoys.txt
         """
 
-rule star_1pass:
+rule star_1pass_PE:
     input:
         index=star_index,
         f1="results/trim/{sample}/{sample}_{unit}_R1_trimmed.fastq.gz",
@@ -136,7 +165,56 @@ rule star_1pass:
         --outFileNamePrefix results/STAR_1p/{wildcards.sample}_{wildcards.unit} 2>&1 | tee -a {log}
         """
 
-rule star_2pass:
+rule star_1pass_SE:
+    input:
+        index=star_index,
+        f1="results/trim/{sample}/{sample}_{unit}_R1_trimmed.fastq.gz"
+    output:
+        SJ="results/STAR_1p/SE/{sample}_{unit}SJ.out.tab",
+        outputs=temp(multiext("results/STAR_1p/SE/{sample}_{unit}", "Log.progress.out", "Log.final.out", "Log.out"))
+    params:
+        idx=lambda wildcards, input: input.index[:-2]
+    threads: config["ncpus_STAR_align"]
+    resources:
+        mem_mb=config["mem_STAR_align"],
+        runtime_min=config["rt_STAR_align"]
+    benchmark:
+        "benchmark/STAR_1p/{sample}_{unit}.tsv"
+    log:
+        "logs/STAR_1p/{sample}_{unit}.log"
+    conda:
+        "../envs/RNAseq.yaml"
+    priority: 1
+    shell:
+        """
+        STAR \
+        --genomeDir {params.idx} \
+        --readFilesIn {input.f1} \
+        --runThreadN {threads} \
+        --readFilesCommand zcat \
+        --outFilterMultimapScoreRange 1 \
+        --outFilterMultimapNmax 20 \
+        --outFilterMismatchNmax 10 \
+        --outFilterType BySJout \
+        --alignIntronMax 500000 \
+        --alignIntronMin 20 \
+        --alignMatesGapMax 1000000 \
+        --sjdbScore 2 \
+        --alignSJDBoverhangMin 5 \
+        --genomeLoad NoSharedMemory \
+        --outFilterMatchNminOverLread 0.1 \
+        --outFilterScoreMinOverLread 0.1 \
+        --sjdbOverhang 250 \
+        --outSAMstrandField intronMotif \
+        --peOverlapNbasesMin 10 \
+        --alignSplicedMateMapLminOverLmate 0.5 \
+        --alignSJstitchMismatchNmax 5 -1 5 5 \
+        --outSAMtype None \
+        --outSAMmode None \
+        --outFileNamePrefix results/STAR_1p/{wildcards.sample}_{wildcards.unit} 2>&1 | tee -a {log}
+        """
+
+rule star_2pass_PE:
     input:
         f1="results/trim/{sample}/{sample}_{unit}_R1_trimmed.fastq.gz",
         f2="results/trim/{sample}/{sample}_{unit}_R2_trimmed.fastq.gz",
@@ -198,10 +276,70 @@ rule star_2pass:
         --outFileNamePrefix results/STAR_2p/{wildcards.sample}_{wildcards.unit} 2>&1 | tee -a {log}
         """
 
+rule star_2pass_SE:
+    input:
+        f1="results/trim/{sample}/{sample}_{unit}_R1_trimmed.fastq.gz",
+        index=star_index,
+        SJ=gather_SJ
+    output:
+        bam=temp("results/STAR_2p/SE/{sample}_{unit}Aligned.out.bam"),
+        star_logs=multiext("results/STAR_2p/SE/{sample}_{unit}", "SJ.out.tab", "Log.final.out", "Log.out", "Chimeric.out.junction")
+    params:
+        compression=config["compression_level"],
+        idx=lambda wildcards, input: input.index[:-2]
+    threads: config["ncpus_STAR_align"]
+    resources:
+        mem_mb=config["mem_STAR_align"],
+        runtime_min=config["rt_STAR_align"]
+    benchmark:
+        "benchmark/STAR_2p/{sample}_{unit}.tsv"
+    log:
+        "logs/STAR_2p/{sample}_{unit}.log"
+    conda:
+        "../envs/RNAseq.yaml"
+    priority: 1
+    shell:
+        """
+        STAR \
+        --genomeDir {params.idx} \
+        --readFilesIn {input.f1} \
+        --runThreadN {threads} \
+        --readFilesCommand zcat \
+        --outBAMcompression {params.compression} \
+        --outFilterType BySJout \
+        --outFilterMultimapScoreRange 1 \
+        --outFilterMultimapNmax 20 \
+        --outFilterMismatchNmax 10 \
+        --alignIntronMax 500000 \
+        --alignIntronMin 20 \
+        --alignMatesGapMax 1000000 \
+        --sjdbScore 2 \
+        --outSAMtype BAM Unsorted \
+        --alignSJDBoverhangMin 5 \
+        --genomeLoad NoSharedMemory \
+        --sjdbFileChrStartEnd {input.SJ} \
+        --outFilterMatchNminOverLread 0.1 \
+        --outFilterScoreMinOverLread 0.1 \
+        --sjdbOverhang 250 \
+        --outSAMstrandField intronMotif \
+        --peOverlapNbasesMin 10 \
+        --alignSplicedMateMapLminOverLmate 0.5 \
+        --alignSJstitchMismatchNmax 5 -1 5 5 \
+        --chimSegmentMin 10 \
+        --chimOutJunctionFormat 1 \
+        --chimOutType Junctions WithinBAM HardClip \
+        --chimJunctionOverhangMin 10 \
+        --chimScoreDropMax 30 \
+        --chimScoreJunctionNonGTAG 0 \
+        --chimScoreSeparation 1 \
+        --chimSegmentReadGapMax 3 \
+        --chimMultimapNmax 20 \
+        --outFileNamePrefix results/STAR_2p/{wildcards.sample}_{wildcards.unit} 2>&1 | tee -a {log}
+        """
 
 rule sortBam:
     input:
-        bam="results/STAR_2p/{sample}_{unit}Aligned.out.bam"
+        bam=input_bam
     output:
         sbam="results/sortedBams/{sample}_{unit}.Aligned.sortedByCoord.out.bam",
         bai="results/sortedBams/{sample}_{unit}.Aligned.sortedByCoord.out.bam.bai"
@@ -273,7 +411,7 @@ rule mergeBam:
         fi
         """
 
-rule salmon_quant:
+rule salmon_quant_PE:
     input:
         index=salmon_index,
         f1=gather_salmon_input1,
@@ -298,6 +436,31 @@ rule salmon_quant:
     priority: 1
     shell:
         "salmon quant -p {threads} -i {params.idx} -l A -1 {input.f1} -2 {input.f2} --validateMappings --rangeFactorizationBins 4 --gcBias -o {params.dir} 2>&1 | tee -a {log}"
+
+rule salmon_quant_SE:
+    input:
+        index=salmon_index,
+        f1=gather_salmon_input1
+    output:
+        tc="results/salmon/SE/{sample}/quant.sf",
+        flen="results/salmon/SE/{sample}/libParams/flenDist.txt",
+        meta="results/salmon/SE/{sample}/aux_info/meta_info.json"
+    params:
+        idx=lambda wildcards, input: input.index[:-10],
+        dir="results/salmon/{sample}/"
+    threads: config["ncpus_salmonQuant"]
+    resources:
+        mem_mb=config["mem_salmonQuant"],
+        runtime_min=config["rt_salmonQuant"]
+    benchmark:
+        "benchmark/salmonQuant/{sample}.tsv"
+    log:
+        "logs/salmonQuant/{sample}.log"
+    conda:
+        "../envs/RNAseq.yaml"
+    priority: 1
+    shell:
+        "salmon quant -p {threads} -i {params.idx} -l A -1 {input.f1} --fldMean 275 --fldSD 50 --validateMappings --rangeFactorizationBins 4 --gcBias -o {params.dir} 2>&1 | tee -a {log}"
 
 rule featureCounts:
     input:
@@ -326,15 +489,15 @@ rule featureCounts:
     priority: 1
     shell:
         """
-        featureCounts -p -a {input.gtf} -T {threads} -t exon -g gene_id -o {output.gene_counts} {input.bam}
-        featureCounts -p -a {input.fc} -T {threads} -t exon -g gene_id -o {output.gene_counts_fc} {input.bam}
-        featureCounts -p -f -a {input.gtf} -T {threads} -t exon -g gene_id -o {output.exon_counts} {input.bam}
-        featureCounts -p -f -a {input.fc} -T {threads} -t exon -g gene_id -o {output.exon_counts_fc} {input.bam}
+        featureCounts -p -a {input.gtf} -T {threads} -s {params.strand} -t exon -g gene_id -o {output.gene_counts} {input.bam}
+        featureCounts -p -a {input.fc} -T {threads} -s {params.strand} -t exon -g gene_id -o {output.gene_counts_fc} {input.bam}
+        featureCounts -p -f -O -a {input.gtf} -T {threads} -s {params.strand} -t exon -g gene_id -o {output.exon_counts} {input.bam}
+        featureCounts -p -f -O -a {input.fc} -T {threads} -s {params.strand} -t exon -g gene_id -o {output.exon_counts_fc} {input.bam}
         """
 
 rule TxImport:
     input:
-        quant="results/salmon/{sample}/quant.sf",
+        quant=get_salmon_output,
         tx2gene="resources/tx2gene.tsv.gz",
         gtf="resources/gencode.v38lift37.annotation.gtf"
     output:
@@ -423,10 +586,14 @@ rule STARfusion:
 
 rule megadepth:
     input:
-        bed = "resources/pasites_hg19.bed",
+        bed="resources/pasites_hg19.bed",
         bam="results/mergedBam/{sample}.Aligned.sortedByCoord.out.bam"
     output:
         paQuant="results/paQuant/{sample}_paQuant.tsv.gz"
+    threads: config["ncpus_megadepth"]
+    resources:
+        mem_mb=config["mem_megadepth"],
+        runtime_min=config["rt_megadepth"]
     conda:
         "../envs/RNAseq.yaml"
     priority: 1

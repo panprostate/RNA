@@ -73,6 +73,11 @@ rt_STARfusion: "04:00:00"
 #RSeQC
 mem_qc: 2000
 rt_qc: "00:30:00"
+
+# STAR-fusion
+ncpus_megadepth: 2
+mem_megadepth: 8000
+rt_megadepth: "04:00:00"
 ################################################################################
 # Variant Calling Pipeline Configurations
 ################################################################################

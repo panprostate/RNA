@@ -32,7 +32,7 @@ rule VC_create_intervalList:
     script:
         "../scripts/createInterval.R"
 
-rule VC_create_uBam:
+rule VC_create_uBam_PE:
     input:
         f1="results/trim/{sample}/{sample}_{unit}_R1_trimmed.fastq.gz",
         f2="results/trim/{sample}/{sample}_{unit}_R2_trimmed.fastq.gz"
@@ -66,13 +66,44 @@ rule VC_create_uBam:
         --COMPRESSION_LEVEL {params.compression} 2>> {log}
         """
 
+rule VC_create_uBam_SE:
+    input:
+        f1="results/trim/{sample}/{sample}_{unit}_R1_trimmed.fastq.gz"
+    output:
+        ubam="results/variantCalling/ubams/SE/{sample}_{unit}.ubam"
+    params:
+        tmp_dir=config["tmp_dir"],
+        compression=config["compression_level"],
+        RG="{sample}"
+    threads: 2
+    resources:
+        mem_mb=config["mem_create_uBam"],
+        runtime_min=config["rt_create_uBam"]
+    benchmark:
+        "benchmark/create_uBam/{sample}_{unit}.tsv"
+    log:
+        "logs/create_uBam/{sample}_{unit}.log"
+    conda:
+        "../envs/variantCalling.yaml"
+    shell:
+        """
+        SM=$(basename {input.f1} |  sed 's/_L00.*//g')
+        gatk FastqToSam \
+        -F1 {input.f1} \
+        -O {output.ubam} \
+        -RG {params.RG} \
+        -SM $SM \
+        -PL illumina \
+        --TMP_DIR {params.tmp_dir} \
+        --COMPRESSION_LEVEL {params.compression} 2>> {log}
+        """
 
 rule VC_mergeuBams:
     input:
         reference="resources/Homo_sapiens_assembly19_1000genomes_decoy.fasta",
         refDict="resources/Homo_sapiens_assembly19_1000genomes_decoy.dict",
         refIndex="resources/Homo_sapiens_assembly19_1000genomes_decoy.fasta.fai",
-        ubam="results/variantCalling/ubams/{sample}_{unit}.ubam",
+        ubam=ubam_input,
         bam="results/sortedBams/{sample}_{unit}.Aligned.sortedByCoord.out.bam"
     output:
         merged=temp("results/variantCalling/mergedBam/{sample}_{unit}.bam")

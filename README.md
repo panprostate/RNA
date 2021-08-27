@@ -23,15 +23,15 @@ On the same note, avoid moving/creating/removing files under the `results/` fold
 ## **How to run**
 1. Download the snakemake workflow.
 ```
-wget https://github.com/panprostate/RNA/releases/download/v1.0.6-beta/PPCG_RNA_v1.0.6-beta.tar.gz
-tar -xzvf PPCG_RNA_v1.0.6-beta.tar.gz
+wget https://github.com/panprostate/RNA/releases/download/v1.0.6-beta/PPCG_RNA_v1.0.7-beta.tar.gz
+tar -xzvf PPCG_RNA_v1.0.7-beta.tar.gz
 ```
 
 2. This workflow requires a sample metadata table (tab separated) containing the following fields:
 - sample_name = The sample name, by default anything preceding the "_L00" pattern.
 - unit_name = The unit/lane name, by default it matches the following pattern ".+\_(L00.)\.+".
 - fq1 = Absolute path to the R1 file of the fastq pair.
-- fq2 = Absolute path to the R2 file of the fastq pair.
+- fq2 = Absolute path to the R2 file of the fastq pair. For single-ended libraries this field should contain `NA`.
 
 Create this table under the `config/` folder.
 As reference, a helper script `createTable.sh` is included under `config/` to create this table. Make sure the table format is correct before proceding.
