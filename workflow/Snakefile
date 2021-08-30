@@ -26,8 +26,15 @@ rule all:
         "resources/GRCh37_gencode_v19_CTAT_lib_Mar012021.plug-n-play/ctat_genome_lib_build_dir/ref_genome.fa"
 
 
-include:"rules/inputFunctions.smk"
-include:"rules/downloads.smk"
-include:"rules/RNASeq.smk"
-include:"rules/variantCalling.smk"
-include:"rules/QC.smk"
+if config["library_type"] == "PE":
+    include:"rules/PE/inputFunctions.smk"
+    include:"rules/downloads.smk"
+    include:"rules/PE/RNASeq.smk"
+    include:"rules/PE/variantCalling.smk"
+    include:"rules/PE/QC.smk"
+else:
+    include:"rules/SE/inputFunctions.smk"
+    include:"rules/downloads.smk"
+    include:"rules/SE/RNASeq.smk"
+    include:"rules/SE/variantCalling.smk"
+    include:"rules/SE/QC.smk"

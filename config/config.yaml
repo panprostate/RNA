@@ -2,6 +2,7 @@
 # GENERAL SETTINGS
 ################################################################################
 # Sample metadata table
+library_type: "PE"
 samples: "config/samples.tsv"
 # Build indexes from scratch? True to build and False to download built indexes
 buildIndex: False
