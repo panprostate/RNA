@@ -1,8 +1,9 @@
 ################################################################################
 # GENERAL SETTINGS
 ################################################################################
-# Sample metadata table
+# Library type: PE=paired-ended or SE=single-ended.
 library_type: "PE"
+# Sample metadata table
 samples: "config/samples.tsv"
 # Build indexes from scratch? True to build and False to download built indexes
 buildIndex: False
