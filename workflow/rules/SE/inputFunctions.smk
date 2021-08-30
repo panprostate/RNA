@@ -11,7 +11,7 @@ def salmon_index(wildcards):
         return "resources/salmon_hg19/ctable.bin"
 
 def get_fastq(wildcards):
-    return df.loc[(wildcards.sample, wildcards.unit), ["fq1", "fq2"]]
+    return df.loc[(wildcards.sample, wildcards.unit), ["fq1"]]
 
 def gather_SJ(wildcards):
     SAMPLES=df.loc[:,"sample_name"]
