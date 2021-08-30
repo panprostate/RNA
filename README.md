@@ -23,8 +23,8 @@ On the same note, avoid moving/creating/removing files under the `results/` fold
 ## **How to run**
 1. Download the snakemake workflow.
 ```
-wget https://github.com/panprostate/RNA/releases/download/v1.0.6-beta/PPCG_RNA_v1.0.7-beta.tar.gz
-tar -xzvf PPCG_RNA_v1.0.7-beta.tar.gz
+wget https://github.com/panprostate/RNA/releases/download/v1.0.6-beta/PPCG_RNA_v1.0.8-beta.tar.gz
+tar -xzvf PPCG_RNA_v1.0.8-beta.tar.gz
 ```
 
 2. This workflow requires a sample metadata table (tab separated) containing the following fields:
@@ -57,6 +57,7 @@ This file can be used to include center-specific parameters for your submissions
 ```
 
 4. Edit the amount of resources requested and other general settings in `config/config.yaml`. Some of the options are:
+**NEW** - library_type: Process single-ended libraries. Please note that a mixed sample table is not supported at the moment, make sure all samples are SE or PE in your `samples` variable.
 - samples: path to the metadata table described in step 2.
 - buildIndex: True or False wether to build indexes from files or download built indexes.
 - adapters: adapter sequences used by cutadapt.
