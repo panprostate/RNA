@@ -9,7 +9,7 @@
 #         mem_mb=4000,
 #         runtime_min="00:30:00"
 #     conda:
-#         "../envs/variantCalling.yaml"
+#         "../../envs/variantCalling.yaml"
 #     shell:
 #         """
 #         gatk CreateSequenceDictionary -R {input.reference}
@@ -28,9 +28,9 @@ rule VC_create_intervalList:
         mem_mb=4000,
         runtime_min="00:30:00"
     conda:
-        "../envs/variantCalling.yaml"
+        "../../envs/variantCalling.yaml"
     script:
-        "../scripts/createInterval.R"
+        "../../scripts/createInterval.R"
 
 rule VC_create_uBam:
     input:
@@ -51,7 +51,7 @@ rule VC_create_uBam:
     log:
         "logs/create_uBam/{sample}_{unit}.log"
     conda:
-        "../envs/variantCalling.yaml"
+        "../../envs/variantCalling.yaml"
     shell:
         """
         SM=$(basename {input.f1} |  sed 's/_L00.*//g')
@@ -87,7 +87,7 @@ rule VC_mergeuBams:
     log:
         "logs/mergeBams/{sample}_{unit}.log"
     conda:
-        "../envs/variantCalling.yaml"
+        "../../envs/variantCalling.yaml"
     shell:
         """
         gatk \
@@ -116,7 +116,7 @@ rule VC_concatBam:
     log:
         "logs/mergedBam/{sample}.log"
     conda:
-        "../envs/variantCalling.yaml"
+        "../../envs/variantCalling.yaml"
     shell:
         """
         INPUT=({input.bams})
@@ -146,7 +146,7 @@ rule VC_markDuplicates:
     log:
         "logs/markDuplicates/{sample}.log"
     conda:
-        "../envs/variantCalling.yaml"
+        "../../envs/variantCalling.yaml"
     shell:
         """
         gatk \
@@ -181,7 +181,7 @@ rule VC_splitNCigars:
     log:
         "logs/splitNCigars/{sample}.log"
     conda:
-        "../envs/variantCalling.yaml"
+        "../../envs/variantCalling.yaml"
     shell:
         """
         gatk \
@@ -214,7 +214,7 @@ rule VC_baseRecalibrator:
     log:
         "logs/baseRecalibrator/{sample}.log"
     conda:
-        "../envs/variantCalling.yaml"
+        "../../envs/variantCalling.yaml"
     shell:
         """
         gatk --java-options "-XX:GCTimeLimit=50 -XX:GCHeapFreeLimit=10 -XX:+PrintFlagsFinal \
@@ -253,7 +253,7 @@ rule VC_applyBQSR:
     log:
         "logs/applyBQSR/{sample}.log"
     conda:
-        "../envs/variantCalling.yaml"
+        "../../envs/variantCalling.yaml"
     shell:
         """
         gatk \
@@ -292,7 +292,7 @@ rule VC_haplotypeCaller:
     log:
         "logs/haplotypeCaller/{sample}.log"
     conda:
-        "../envs/variantCalling.yaml"
+        "../../envs/variantCalling.yaml"
     shell:
         """
         gatk --java-options "-Xms6000m -XX:GCTimeLimit=50 -XX:GCHeapFreeLimit=10 -XX:ParallelGCThreads=1" \
@@ -327,7 +327,7 @@ rule VC_filterVCF:
     log:
         "logs/filterVCF/{sample}.log"
     conda:
-        "../envs/variantCalling.yaml"
+        "../../envs/variantCalling.yaml"
     shell:
         """
         gatk \

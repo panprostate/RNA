@@ -10,9 +10,9 @@ rule rseqc_gtf2bed:
     log:
         "logs/rseqc/rseqc_gtf2bed.log",
     conda:
-        "../envs/RNAseq.yaml"
+        "../../envs/RNAseq.yaml"
     script:
-        "../scripts/gtf2bed.py"
+        "../../scripts/gtf2bed.py"
 
 rule fastqc:
     input:
@@ -27,7 +27,7 @@ rule fastqc:
     params:
         dir="results/qc/fastqc/{sample}/",
     conda:
-        "../envs/RNAseq.yaml"
+        "../../envs/RNAseq.yaml"
     shell:
         """
         fastqc -o {params.dir} {input.bam}
@@ -49,7 +49,7 @@ rule rseqc_junction_annotation:
         extra=r"-q 255",  # STAR uses 255 as a score for unique mappers
         prefix="results/qc/rseqc/{sample}_{unit}.junctionanno",
     conda:
-        "../envs/RNAseq.yaml"
+        "../../envs/RNAseq.yaml"
     shell:
         "junction_annotation.py {params.extra} -i {input.bam} -r {input.bed} -o {params.prefix} "
         "> {log[0]} 2>&1"
@@ -70,7 +70,7 @@ rule rseqc_junction_saturation:
         extra=r"-q 255",
         prefix="results/qc/rseqc/{sample}_{unit}.junctionsat",
     conda:
-        "../envs/RNAseq.yaml"
+        "../../envs/RNAseq.yaml"
     shell:
         "junction_saturation.py {params.extra} -i {input.bam} -r {input.bed} -o {params.prefix} "
         "> {log} 2>&1"
@@ -87,7 +87,7 @@ rule rseqc_stat:
     log:
         "logs/rseqc/rseqc_stat/{sample}_{unit}.log",
     conda:
-        "../envs/RNAseq.yaml"
+        "../../envs/RNAseq.yaml"
     shell:
         "bam_stat.py -i {input} > {output} 2> {log}"
 
@@ -104,7 +104,7 @@ rule rseqc_infer:
     log:
         "logs/rseqc/rseqc_infer/{sample}_{unit}.log",
     conda:
-        "../envs/RNAseq.yaml"
+        "../../envs/RNAseq.yaml"
     shell:
         "infer_experiment.py -r {input.bed} -i {input.bam} > {output} 2> {log}"
 
@@ -123,7 +123,7 @@ rule rseqc_innerdis:
     params:
         prefix="results/qc/rseqc/{sample}_{unit}.inner_distance_freq",
     conda:
-        "../envs/RNAseq.yaml"
+        "../../envs/RNAseq.yaml"
     shell:
         "inner_distance.py -r {input.bed} -i {input.bam} -o {params.prefix} > {log} 2>&1"
 
@@ -140,7 +140,7 @@ rule rseqc_readdis:
     log:
         "logs/rseqc/rseqc_readdis/{sample}_{unit}.log",
     conda:
-        "../envs/RNAseq.yaml"
+        "../../envs/RNAseq.yaml"
     shell:
         "read_distribution.py -r {input.bed} -i {input.bam} > {output} 2> {log}"
 
@@ -158,7 +158,7 @@ rule rseqc_readdup:
     params:
         prefix="results/qc/rseqc/{sample}_{unit}.readdup",
     conda:
-        "../envs/RNAseq.yaml"
+        "../../envs/RNAseq.yaml"
     shell:
         "read_duplication.py -i {input} -o {params.prefix} > {log} 2>&1"
 
@@ -176,7 +176,7 @@ rule rseqc_readgc:
     params:
         prefix="results/qc/rseqc/{sample}_{unit}.readgc",
     conda:
-        "../envs/RNAseq.yaml"
+        "../../envs/RNAseq.yaml"
     shell:
         "read_GC.py -i {input} -o {params.prefix} > {log} 2>&1"
 
@@ -204,7 +204,7 @@ rule bamqc:
     log:
         "logs/bam_qc.log",
     conda:
-        "../envs/RNAseq.yaml"
+        "../../envs/RNAseq.yaml"
     shell:
         "multiqc"
         " --force"
@@ -229,7 +229,7 @@ rule sample_qc:
     log:
         "logs/samples_qc.log",
     conda:
-        "../envs/RNAseq.yaml"
+        "../../envs/RNAseq.yaml"
     shell:
         "multiqc"
         " --force"
@@ -251,7 +251,7 @@ rule reads_qc:
     log:
         "logs/read_qc.log",
     conda:
-        "../envs/RNAseq.yaml"
+        "../../envs/RNAseq.yaml"
     shell:
         "multiqc"
         " --force"

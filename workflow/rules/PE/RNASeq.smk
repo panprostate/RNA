@@ -17,7 +17,7 @@ rule trim:
     log:
         "logs/trimqc/{sample}_{unit}.log"
     conda:
-        "../envs/RNAseq.yaml"
+        "../../envs/RNAseq.yaml"
     priority: 1
     shell:
         "cutadapt"
@@ -46,7 +46,7 @@ rule star_index_build:
     log:
         "logs/STARindex/STARindex.log"
     conda:
-        "../envs/RNAseq.yaml"
+        "../../envs/RNAseq.yaml"
     priority: 2
     shell:
         "STAR"
@@ -74,7 +74,7 @@ rule salmon_index_build:
     log:
         "logs/salmonIndex/salmonIndex.log"
     conda:
-        "../envs/RNAseq.yaml"
+        "../../envs/RNAseq.yaml"
     priority: 2
     shell:
         """
@@ -105,7 +105,7 @@ rule star_1pass:
     log:
         "logs/STAR_1p/{sample}_{unit}.log"
     conda:
-        "../envs/RNAseq.yaml"
+        "../../envs/RNAseq.yaml"
     priority: 1
     shell:
         """
@@ -157,7 +157,7 @@ rule star_2pass:
     log:
         "logs/STAR_2p/{sample}_{unit}.log"
     conda:
-        "../envs/RNAseq.yaml"
+        "../../envs/RNAseq.yaml"
     priority: 1
     shell:
         """
@@ -213,7 +213,7 @@ rule sortBam:
     log:
         "logs/sortBam/{sample}_{unit}.log"
     conda:
-        "../envs/RNAseq.yaml"
+        "../../envs/RNAseq.yaml"
     priority: 1
     shell:
         """
@@ -240,7 +240,7 @@ rule mergeBam:
     log:
         "logs/mergedBam/{sample}.log"
     conda:
-        "../envs/RNAseq.yaml"
+        "../../envs/RNAseq.yaml"
     priority: 1
     shell:
         """
@@ -293,7 +293,7 @@ rule salmon_quant:
     log:
         "logs/salmonQuant/{sample}.log"
     conda:
-        "../envs/RNAseq.yaml"
+        "../../envs/RNAseq.yaml"
     priority: 1
     shell:
         "salmon quant -p {threads} -i {params.idx} -l A -1 {input.f1} -2 {input.f2} --validateMappings --rangeFactorizationBins 4 --gcBias -o {params.dir} 2>&1 | tee -a {log}"
@@ -321,7 +321,7 @@ rule featureCounts:
     log:
         "logs/featureCounts/{sample}.log"
     conda:
-        "../envs/RNAseq.yaml"
+        "../../envs/RNAseq.yaml"
     priority: 1
     shell:
         """
@@ -350,10 +350,10 @@ rule TxImport:
     log:
         "logs/txImport/{sample}.log"
     conda:
-        "../envs/RNAseq.yaml"
+        "../../envs/RNAseq.yaml"
     priority: 1
     script:
-        "../scripts/txImport.R"
+        "../../scripts/txImport.R"
 
 rule arriba:
     input:
@@ -375,7 +375,7 @@ rule arriba:
     log:
         "logs/arriba/{sample}.log"
     conda:
-        "../envs/RNAseq.yaml"
+        "../../envs/RNAseq.yaml"
     priority: 1
     shell:
         """
@@ -409,7 +409,7 @@ rule STARfusion:
     log:
         "logs/STARfusion/{sample}.log"
     conda:
-        "../envs/STARfusion.yaml"
+        "../../envs/STARfusion.yaml"
     priority: 1
     shell:
         """
@@ -431,7 +431,7 @@ rule megadepth:
         mem_mb=config["mem_megadepth"],
         runtime_min=config["rt_megadepth"]
     conda:
-        "../envs/RNAseq.yaml"
+        "../../envs/RNAseq.yaml"
     priority: 1
     shell:
         "megadepth {input.bam} --annotation {input.bed} --gzip --op sum > {output.paQuant}"
