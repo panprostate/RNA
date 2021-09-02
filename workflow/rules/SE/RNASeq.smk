@@ -429,4 +429,7 @@ rule megadepth:
         "../../envs/RNAseq.yaml"
     priority: 1
     shell:
-        "megadepth {input.bam} --annotation {input.bed} --gzip --op sum > {output.paQuant}"
+        """
+        megadepth {input.bam} --annotation {input.bed} --op sum > results/paQuant/{wildcards.sample}_paQuant.tsv
+        gzip results/paQuant/{wildcards.sample}_paQuant.tsv
+        """

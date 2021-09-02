@@ -24,6 +24,10 @@ rule all:
         expand("results/variantCalling/vcf_filtered/{sample}.vcf.gz", sample=SAMPLES),
         expand("results/fusion/STAR_fusion/{sample}/star-fusion.fusion_predictions.tsv", sample=SAMPLES),
         "resources/GRCh37_gencode_v19_CTAT_lib_Mar012021.plug-n-play/ctat_genome_lib_build_dir/ref_genome.fa"
+    output:
+        complete="results/COMPLETED"
+    shell:
+        "touch {output.complete}"
 
 
 if config["library_type"] == "PE":
