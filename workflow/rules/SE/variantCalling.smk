@@ -36,7 +36,7 @@ rule VC_create_uBam:
     input:
         f1="results/trim/{sample}/{sample}_{unit}_R1_trimmed.fastq.gz"
     output:
-        ubam="results/variantCalling/ubams/{sample}_{unit}.ubam"
+        ubam=temp("results/variantCalling/ubams/{sample}_{unit}.ubam")
     params:
         tmp_dir=config["tmp_dir"],
         compression=config["compression_level"],
@@ -104,7 +104,7 @@ rule VC_concatBam:
     input:
         bams=VC_gather_bams
     output:
-        mbam="results/variantCalling/concatBam/{sample}.Aligned.sortedByCoord.out.bam"
+        mbam=temp("results/variantCalling/concatBam/{sample}.Aligned.sortedByCoord.out.bam")
     threads: 2
     resources:
         mem_mb=config["mem_concat"],
