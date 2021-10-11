@@ -214,29 +214,41 @@ rule bamqc:
 
 rule sample_qc:
     input:
-        expand("results/counts/featureCounts/{sample}_geneCounts_gencode.tsv.summary", sample=SAMPLES),
-        expand("results/counts/featureCounts/{sample}_geneCounts_fc.tsv.summary", sample=SAMPLES),
-        expand("results/salmon/{sample}/aux_info/meta_info.json",sample=SAMPLES),
-        expand("results/salmon/{sample}/libParams/flenDist.txt",sample=SAMPLES) 
+        gcg=expand("results/counts/featureCounts/{sample}_geneCounts_gencode.tsv.summary", sample=SAMPLES),
+        gcf=expand("results/counts/featureCounts/{sample}_geneCounts_fc.tsv.summary", sample=SAMPLES),
+        ecg=expand("results/counts/featureCounts/{sample}_exonCounts_gencode.tsv.summary", sample=SAMPLES),
+        ecf=expand("results/counts/featureCounts/{sample}_exonCounts_fc.tsv.summary", sample=SAMPLES),
+        salmon=expand("results/salmon/{sample}/aux_info/meta_info.json",sample=SAMPLES),
+        salmon_length=expand("results/salmon/{sample}/libParams/flenDist.txt",sample=SAMPLES) 
     output:
-        "results/qc/samples_qc.html"
+        geneCount_gc="results/qc/featureCounts_gene_gencode.html",
+        geneCount_fc="results/qc/featureCounts_gene_fc.html",
+        exonCount_gc="results/qc/featureCounts_exon_gencode.html",
+        exonCount_fc="results/qc/featureCounts_exon_fc.html",
+        salmon="results/qc/salmon.html"
     resources:
         mem_mb=config["mem_qc"],
         runtime_min=config["rt_qc"]
     params:
     	outDir="results/qc",
-        name="samples_qc.html"
+        geneCount_gc="featureCounts_gene_gencode.html",
+        geneCount_fc="featureCounts_gene_fc.html",
+        exonCount_gc="featureCounts_exon_gencode.html",
+        exonCount_fc="featureCounts_exon_fc.html",
+        salmon="salmon.html"
     log:
         "logs/samples_qc.log",
     conda:
         "../../envs/RNAseq.yaml"
     shell:
-        "multiqc"
-        " --force"
-        " -o {params.outDir}"
-        " -n {params.name}"
-        " {input}"
-
+        """
+        set -e
+        multiqc --force -o {params.outDir} -n {params.geneCount_gc} {input.gcg}"
+        multiqc --force -o {params.outDir} -n {params.geneCount_fc} {input.gcf}"
+        multiqc --force -o {params.outDir} -n {params.exonCount_gc} {input.ecg}"
+        multiqc --force -o {params.outDir} -n {params.exonCount_fc} {input.ecf}"
+        multiqc --force -o {params.outDir} -n {params.salmon} {input.salmon} {input.salmon_length}"
+        """
 rule reads_qc:
     input:
         expand("results/qc/fastqc/{sample}/{sample}_{unit}_fastqc.zip",zip, sample=samples_trim, unit=unit_trim)

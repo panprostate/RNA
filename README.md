@@ -77,17 +77,11 @@ The workflow will automatically pull and create a Singularity container from `do
 
 ## Troubleshooting
 Depending on the number of samples and read length, you might end up with an excessive amount of SJs detect. In this case you will encounter the error bellow:
-
 `Fatal LIMIT error: the number of junctions to be inserted on the fly =XXXXXXX is larger than the limitSjdbInsertNsj=1000000`
-
 While you can increase this limit, this might cause you to encounter another error:
-
 `EXITING because of FATAL ERROR: cannot insert junctions on the fly because of strand GstrandBit problem`
-
 The solution for this is to decrease the number of SJs being inserted on the fly. You can do this by turning on the SJ filter in the `config.yaml` file, which by default will remove SJs supported by only 1 read (uniquely mapped).
-
 `SJ_filter: True`
-
 `SJ_minCounts: 1`
 
 # **Workflow overview**
