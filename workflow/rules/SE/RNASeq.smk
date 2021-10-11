@@ -329,10 +329,12 @@ rule featureCounts:
     output:
         gene_counts="results/counts/featureCounts/{sample}_geneCounts_gencode.tsv",
         exon_counts="results/counts/featureCounts/{sample}_exonCounts_gencode.tsv",
-        stats="results/counts/featureCounts/{sample}_geneCounts_gencode.tsv.summary",
+        g_stats="results/counts/featureCounts/{sample}_geneCounts_gencode.tsv.summary",
+        g_stats_fc = "results/counts/featureCounts/{sample}_geneCounts_fc.tsv.summary",
+        e_stats="results/counts/featureCounts/{sample}_exonCounts_gencode.tsv.summary",
+        e_stats_fc="results/counts/featureCounts/{sample}_exonCounts_fc.tsv.summary",
         gene_counts_fc = "results/counts/featureCounts/{sample}_geneCounts_fc.tsv",
-        exon_counts_fc = "results/counts/featureCounts/{sample}_exonCounts_fc.tsv",
-        stats_fc = "results/counts/featureCounts/{sample}_geneCounts_fc.tsv.summary"
+        exon_counts_fc = "results/counts/featureCounts/{sample}_exonCounts_fc.tsv"
     params:
         strand=config["fc_strand"]
     threads: config["ncpus_fc"]

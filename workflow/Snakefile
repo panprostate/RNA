@@ -14,7 +14,11 @@ unit_trim=df.unit_name
 
 rule all:
     input:
-        "results/qc/samples_qc.html",
+        "results/qc/featureCounts_gene_gencode.html",
+        "results/qc/featureCounts_gene_fc.html",
+        "results/qc/featureCounts_exon_gencode.html",
+        "results/qc/featureCounts_exon_fc.html",
+        "results/qc/salmon.html",
         "results/qc/reads_qc.html",
         "results/qc/bam_qc.html",
         expand("results/counts/featureCounts/{sample}_geneCounts_gencode.tsv", sample=SAMPLES),
