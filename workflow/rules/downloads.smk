@@ -18,7 +18,7 @@ rule download_resources:
     priority: 3
     threads: 1
     resources:
-        mem_mb = 1000,
+        mem_mb = 8000,
         runtime_min = "24:00:00"
     log:
         "logs/downloads/resources.log"
@@ -57,7 +57,7 @@ rule star_index_download:
     priority: 3
     threads: 1
     resources:
-        mem_mb = 1000,
+        mem_mb = 8000,
         runtime_min = "24:00:00"
     log:
         "logs/STARindex/STARindex.log"
@@ -76,7 +76,7 @@ rule salmon_index_download:
     threads: 1
     priority: 3
     resources:
-        mem_mb = 1000,
+        mem_mb = 8000,
         runtime_min = "24:00:00"
     log:
         "logs/salmonIndex/salmonIndex.log"
@@ -95,7 +95,7 @@ rule download_ctatLib:
     threads: 1
     priority: 2
     resources:
-        mem_mb = 1000,
+        mem_mb = 8000,
         runtime_min = "24:00:00"
     log:
         "logs/STARfusion/download_CTAT.log"
