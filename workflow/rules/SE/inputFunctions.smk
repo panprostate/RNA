@@ -28,6 +28,11 @@ def gather_SJ(wildcards):
         UNITS=df.loc[:,"unit_name"]
         return expand("results/STAR_1p/{sample}_{unit}.filtered.SJ.out.tab", zip, sample=SAMPLES, unit=UNITS)
 
+def gather_bais(wildcards):
+    UNITS=df.loc[wildcards.sample, "unit_name"]
+    bais=expand("results/sortedBams/{sample}_{unit}.Aligned.sortedByCoord.out.bam.bai", unit=UNITS, sample=wildcards.sample)
+    return bais
+
 def gather_bams(wildcards):
     UNITS=df.loc[wildcards.sample, "unit_name"]
     bams=expand("results/sortedBams/{sample}_{unit}.Aligned.sortedByCoord.out.bam", unit=UNITS, sample=wildcards.sample)

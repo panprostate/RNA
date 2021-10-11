@@ -248,7 +248,8 @@ rule sortBam:
 rule mergeBam:
     input:
         bams=gather_bams,
-        chims=gather_chims
+        chims=gather_chims,
+        bais=gather_bais
     output:
         mbam="results/mergedBam/{sample}.Aligned.sortedByCoord.out.bam",
         bai="results/mergedBam/{sample}.Aligned.sortedByCoord.out.bam.bai",

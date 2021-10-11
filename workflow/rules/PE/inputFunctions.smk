@@ -33,6 +33,11 @@ def gather_bams(wildcards):
     bams=expand("results/sortedBams/{sample}_{unit}.Aligned.sortedByCoord.out.bam", unit=UNITS, sample=wildcards.sample)
     return bams
 
+def gather_bais(wildcards):
+    UNITS=df.loc[wildcards.sample, "unit_name"]
+    bais=expand("results/sortedBams/{sample}_{unit}.Aligned.sortedByCoord.out.bam.bai", unit=UNITS, sample=wildcards.sample)
+    return bais
+
 def gather_chims(wildcards):
     UNITS = df.loc[wildcards.sample, "unit_name"]
     chims = expand("results/STAR_2p/{sample}_{unit}Chimeric.out.junction", unit=UNITS, sample=wildcards.sample)
