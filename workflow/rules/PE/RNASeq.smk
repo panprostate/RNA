@@ -141,6 +141,8 @@ rule filter_SJs:
         SJs=gather_SJ_filter
     output:
         filtered="results/STAR_1p/{sample}_{unit}.filtered.SJ.out.tab"
+    params:
+        minCount=config["SJ_minCount"]
     threads: 2
     resources:
         mem_mb=4000,
@@ -158,7 +160,7 @@ rule filter_SJs:
         for f in {input.SJs}; 
         do
             NN=$(sed 's/SJ.out/.filtered.SJ.out/g' $f)
-            awk -F'\t' '$7 > config["SJ_minCount"]' $f > $NN
+            awk -F'\t' '$7 > {params.minCount' $f > $NN
         done;
         """
 
