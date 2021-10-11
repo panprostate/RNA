@@ -66,8 +66,8 @@ rule star_index_download:
     shell:
         """
         set -e
-        wget -O resources/STARindex_hg19 https://www.dropbox.com/s/7zf1ad0hokpizfi/STARindex_hg19.tar
-        tar -xvf resources/STARindex_hg19 --directory resources/
+        wget -O resources/STARindex_hg19.tar https://www.dropbox.com/s/7zf1ad0hokpizfi/STARindex_hg19.tar
+        tar -xvf resources/STARindex_hg19.tar --directory resources/
         """
 
 rule salmon_index_download:
