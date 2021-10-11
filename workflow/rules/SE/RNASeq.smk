@@ -133,6 +133,32 @@ rule star_1pass:
         --outFileNamePrefix results/STAR_1p/{wildcards.sample}_{wildcards.unit} 2>&1 | tee -a {log}
         """
 
+rule filter_SJs:
+    input:
+        SJs=gather_SJ_filter
+    output:
+        filtered="results/STAR_1p/{sample}_{unit}.filtered.SJ.out.tab"
+    threads: 2
+    resources:
+        mem_mb=4000,
+        runtime_min="06:00:00"
+    benchmark:
+        "benchmark/STAR_1p/{sample}_{unit}_filter.tsv"
+    log:
+        "logs/STAR_2p/{sample}_{unit}_filter.log"
+    conda:
+        "../../envs/RNAseq.yaml"
+    priority: 1
+    shell:
+        """
+        set -e
+        for f in {input.SJs}; 
+        do
+            NN=$(sed 's/SJ.out/.filtered.SJ.out/g' $f)
+            awk -F'\t' '$7 > config["SJ_minCount"]' $f > $NN
+        done;
+        """
+
 rule star_2pass:
     input:
         f1="results/trim/{sample}/{sample}_{unit}_R1_trimmed.fastq.gz",

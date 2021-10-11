@@ -32,7 +32,8 @@ rt_STAR_index: "08:00:00"
 ncpus_STAR_align: 8
 mem_STAR_align: 45000
 rt_STAR_align: "04:00:00"
-
+SJ_filter: False
+SJ_minCount: 1
 # Sort Bam 
 ncpus_sortBam: 4
 mem_sortBam: 4000

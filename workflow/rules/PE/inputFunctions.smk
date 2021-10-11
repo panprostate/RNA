@@ -13,10 +13,20 @@ def salmon_index(wildcards):
 def get_fastq(wildcards):
     return df.loc[(wildcards.sample, wildcards.unit), ["fq1", "fq2"]]
 
-def gather_SJ(wildcards):
+def gather_SJ_filter(wildcards):
     SAMPLES=df.loc[:,"sample_name"]
     UNITS=df.loc[:,"unit_name"]
     return expand("results/STAR_1p/{sample}_{unit}SJ.out.tab", zip, sample=SAMPLES, unit=UNITS)
+
+def gather_SJ(wildcards):
+    if config["SJ_filter"] == False:
+        SAMPLES=df.loc[:,"sample_name"]
+        UNITS=df.loc[:,"unit_name"]
+        return expand("results/STAR_1p/{sample}_{unit}SJ.out.tab", zip, sample=SAMPLES, unit=UNITS)
+    else:
+        SAMPLES=df.loc[:,"sample_name"]
+        UNITS=df.loc[:,"unit_name"]
+        return expand("results/STAR_1p/{sample}_{unit}.filtered.SJ.out.tab", zip, sample=SAMPLES, unit=UNITS)
 
 def gather_bams(wildcards):
     UNITS=df.loc[wildcards.sample, "unit_name"]
