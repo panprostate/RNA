@@ -64,11 +64,11 @@ rule aggregate_outputs:
         mem_mb=config["mem_qc"],
         runtime_min=config["rt_qc"]
     log:
-        "logs/samples_qc.log",
+        "logs/{sample}_aggregate.log",
     conda:
         "../../envs/RNAseq.yaml"
     shell:
-        "tar -czvf {wildcards.sample}.tar.gz {input}"
+        "tar -czvf {output.tarfile} {input}"
 
 rule aggregate_metrics:
     input:
@@ -76,30 +76,30 @@ rule aggregate_metrics:
         geneCount_fc="results/qc/featureCounts_gene_fc.html",
         exonCount_gc="results/qc/featureCounts_exon_gencode.html",
         exonCount_fc="results/qc/featureCounts_exon_fc.html",
-        salmon="salmon.html"
+        salmon="results/qc/salmon.html",
         reads_qc="results/qc/reads_qc.html",
         bam_qc="results/qc/bam_qc.html",
         bam_stat="results/qc/bam_qc_data/multiqc_rseqc_bam_stat.txt",
         bam_infer_exp="results/qc/bam_qc_data/multiqc_infer_experiment.txt",
         bam_read_distribution="results/qc/bam_qc_data/multiqc_rseqc_read_distribution.txt",
         star_stat="results/qc/bam_qc_data/multiqc_star.txt",
-        reads_dup"results/qc/reads_qc_data/mqc_fastqc_sequence_counts_plot_1.txt",
+        reads_dup="results/qc/reads_qc_data/mqc_fastqc_sequence_counts_plot_1.txt",
         reads_dup_distribution="results/qc/reads_qc_data/mqc_fastqc_sequence_duplication_levels_plot_1.txt",
-        reads_length_distribution"results/qc/reads_qc_data/mqc_fastqc_sequence_length_distribution_plot_1.txt",
+        reads_length_distribution="results/qc/reads_qc_data/mqc_fastqc_sequence_length_distribution_plot_1.txt",
         reads_quality_scores="results/qc/reads_qc_data/mqc_fastqc_per_sequence_quality_scores_plot_1.txt",
         reads_qc_distribution="results/qc/reads_qc_data/mqc_fastqc_per_sequence_gc_content_plot_Percentages.txt",
-        salmon_stat="results/qc/salmon_data/multiqc_salmon.txt",
+        salmon_stat="results/qc/salmon_data/multiqc_salmon.txt"
     output:
         tarfile="results/tarfiles/metrics.tar.gz",
         map_gene_gc_stat="results/qc/featureCounts_gene_gencode_data/featureCounts_gene_gencode.txt",
         map_gene_fc_stat="results/qc/featureCounts_gene_fc_data/featureCounts_gene_fc.txt",
         map_exon_gc_stat="results/qc/featureCounts_exon_gencode_data/featureCounts_exon_gencode.txt",
-        map_exon_fc_stat="results/qc/featureCounts_exon_fc_data/featureCounts_exon_fc.txt",
+        map_exon_fc_stat="results/qc/featureCounts_exon_fc_data/featureCounts_exon_fc.txt"
     params:
         map_gene_gc_stat="results/qc/featureCounts_gene_gencode_data/multiqc_featureCounts.txt",
         map_gene_fc_stat="results/qc/featureCounts_gene_fc_data/multiqc_featureCounts.txt",
         map_exon_gc_stat="results/qc/featureCounts_exon_gencode_data/multiqc_featureCounts.txt",
-        map_exon_fc_stat="results/qc/featureCounts_exon_fc_data/multiqc_featureCounts.txt",
+        map_exon_fc_stat="results/qc/featureCounts_exon_fc_data/multiqc_featureCounts.txt"
     resources:
         mem_mb=config["mem_qc"],
         runtime_min=config["rt_qc"]
