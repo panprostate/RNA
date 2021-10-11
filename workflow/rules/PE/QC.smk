@@ -243,12 +243,13 @@ rule sample_qc:
     shell:
         """
         set -e
-        multiqc --force -o {params.outDir} -n {params.geneCount_gc} {input.gcg}"
-        multiqc --force -o {params.outDir} -n {params.geneCount_fc} {input.gcf}"
-        multiqc --force -o {params.outDir} -n {params.exonCount_gc} {input.ecg}"
-        multiqc --force -o {params.outDir} -n {params.exonCount_fc} {input.ecf}"
-        multiqc --force -o {params.outDir} -n {params.salmon} {input.salmon} {input.salmon_length}"
+        multiqc --force -o {params.outDir} -n {params.geneCount_gc} {input.gcg}
+        multiqc --force -o {params.outDir} -n {params.geneCount_fc} {input.gcf}
+        multiqc --force -o {params.outDir} -n {params.exonCount_gc} {input.ecg}
+        multiqc --force -o {params.outDir} -n {params.exonCount_fc} {input.ecf}
+        multiqc --force -o {params.outDir} -n {params.salmon} {input.salmon} {input.salmon_length}
         """
+
 rule reads_qc:
     input:
         expand("results/qc/fastqc/{sample}/{sample}_{unit}_fastqc.zip",zip, sample=samples_trim, unit=unit_trim)
