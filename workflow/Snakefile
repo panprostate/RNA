@@ -72,7 +72,7 @@ rule aggregate_outputs:
     log:
         "logs/{sample}_aggregate.log",
     conda:
-        "../../envs/RNAseq.yaml"
+        "envs/RNAseq.yaml"
     shell:
         "tar -czvf {output.tarfile} {input}"
 
@@ -112,7 +112,7 @@ rule aggregate_metrics:
     log:
         "logs/samples_qc.log",
     conda:
-        "../../envs/RNAseq.yaml"
+        "envs/RNAseq.yaml"
     shell:
         """
         set -e

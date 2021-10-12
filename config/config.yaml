@@ -19,6 +19,7 @@ tmp_dir: "/tmp"
 ################################################################################
 # Trimming and Quality Control
 adapters: "-a AGATCGGAAGAGCACACGTCTGAACTCCAGTCA -A AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT"
+adapters_SE: "-a AGATCGGAAGAGCACACGTCTGAACTCCAGTCA"
 ncpus_trim: 4
 mem_trim: 4000
 rt_trim: "04:00:00"
