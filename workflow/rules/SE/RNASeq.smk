@@ -5,7 +5,7 @@ rule trim:
         fastq1=temp("results/trim/{sample}/{sample}_{unit}_R1_trimmed.fastq.gz"),
         qc="results/qc/{sample}/{sample}_{unit}_trim.log"
     params:
-        adapters=config["adapters"],
+        adapters=config["adapters_SE"],
         compression=config["compression_level"]
     threads: config["ncpus_trim"]
     resources:
