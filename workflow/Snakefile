@@ -21,6 +21,8 @@ rule all:
         "results/qc/salmon.html",
         "results/qc/reads_qc.html",
         "results/qc/bam_qc.html",
+        "results/tarfiles/metrics.tar.gz",
+        expand("results/tarfiles/{sample}.tar.gz", sample=SAMPLES),
         expand("results/counts/featureCounts/{sample}_geneCounts_gencode.tsv", sample=SAMPLES),
         expand("results/counts/salmon/{sample}_geneCounts.tsv", sample=SAMPLES),
         expand("results/paQuant/{sample}_paQuant.tsv.gz", sample=SAMPLES),
