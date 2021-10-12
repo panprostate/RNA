@@ -140,7 +140,7 @@ rule filter_SJs:
     input:
         SJs=gather_SJ_filter
     output:
-        filtered="results/STAR_1p/{sample}_{unit}.filtered.SJ.out.tab"
+        filtered="results/STAR_1p_filtered/{sample}_{unit}.filtered.SJ.out.tab"
     params:
         minCount=config["SJ_minCount"]
     threads: 2

@@ -229,7 +229,8 @@ rule sample_qc:
         geneCount_fc="results/qc/featureCounts_gene_fc.html",
         exonCount_gc="results/qc/featureCounts_exon_gencode.html",
         exonCount_fc="results/qc/featureCounts_exon_fc.html",
-        salmon="results/qc/salmon.html"
+        salmon="results/qc/salmon.html",
+        salmon_mqc="results/qc/salmon_data/multiqc_salmon.txt"
     resources:
         mem_mb=config["mem_qc"],
         runtime_min=config["rt_qc"]

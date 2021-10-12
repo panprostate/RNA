@@ -26,7 +26,7 @@ def gather_SJ(wildcards):
     else:
         SAMPLES=df.loc[:,"sample_name"]
         UNITS=df.loc[:,"unit_name"]
-        return expand("results/STAR_1p/{sample}_{unit}.filtered.SJ.out.tab", zip, sample=SAMPLES, unit=UNITS)
+        return expand("results/STAR_1p_filtered/{sample}_{unit}.filtered.SJ.out.tab", zip, sample=SAMPLES, unit=UNITS)
 
 def gather_SJ_aggregate(wildcards):
     SAMPLES=df.loc[:,"sample_name"]
