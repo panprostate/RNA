@@ -62,7 +62,7 @@ rule aggregate_outputs:
         arriba="results/fusion/arriba/{sample}.tsv",
         STARfusion="results/fusion/STAR_fusion/{sample}/star-fusion.fusion_predictions.tsv",
         PAcounts="results/paQuant/{sample}_paQuant.tsv.gz",
-        SJcounts="results/STAR_2p/{sample}SJ.out.tab",
+        SJcounts=gather_SJ,
         vc="results/variantCalling/vcf_filtered/{sample}.vcf.gz"
     output:
         tarfile="results/tarfiles/{sample}.tar.gz"

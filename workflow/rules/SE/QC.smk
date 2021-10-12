@@ -192,9 +192,14 @@ rule bamqc:
         expand("results/qc/rseqc/{sample}_{unit}.readdistribution.txt",zip, sample=samples_trim, unit=unit_trim),
         expand("results/qc/rseqc/{sample}_{unit}.readdup.DupRate_plot.pdf",zip, sample=samples_trim, unit=unit_trim),
         expand("results/qc/rseqc/{sample}_{unit}.readgc.GC_plot.pdf",zip, sample=samples_trim, unit=unit_trim),
-        expand("results/STAR_2p/{sample}_{unit}Log.final.out",zip, sample=samples_trim, unit=unit_trim)
+        expand("results/STAR_2p/{sample}_{unit}Log.final.out",zip, sample=samples_trim, unit=unit_trim),
+        
     output:
-        "results/qc/bam_qc.html"
+        out="results/qc/bam_qc.html",
+        bam_stat="results/qc/bam_qc_data/multiqc_rseqc_bam_stat.txt",
+        bam_infer_exp="results/qc/bam_qc_data/multiqc_infer_experiment.txt",
+        bam_read_distribution="results/qc/bam_qc_data/multiqc_rseqc_read_distribution.txt",
+        star_stat="results/qc/bam_qc_data/multiqc_star.txt",
     resources:
         mem_mb=config["mem_qc"],
         runtime_min=config["rt_qc"]
@@ -254,7 +259,12 @@ rule reads_qc:
     input:
         expand("results/qc/fastqc/{sample}/{sample}_{unit}_fastqc.zip",zip, sample=samples_trim, unit=unit_trim)
     output:
-        "results/qc/reads_qc.html"
+        out="results/qc/reads_qc.html",
+        reads_dup="results/qc/reads_qc_data/mqc_fastqc_sequence_counts_plot_1.txt",
+        reads_dup_distribution="results/qc/reads_qc_data/mqc_fastqc_sequence_duplication_levels_plot_1.txt",
+        reads_length_distribution="results/qc/reads_qc_data/mqc_fastqc_sequence_length_distribution_plot_1.txt",
+        reads_quality_scores="results/qc/reads_qc_data/mqc_fastqc_per_sequence_quality_scores_plot_1.txt",
+        reads_qc_distribution="results/qc/reads_qc_data/mqc_fastqc_per_sequence_gc_content_plot_Percentages.txt",
     resources:
         mem_mb=config["mem_qc"],
         runtime_min=config["rt_qc"]
