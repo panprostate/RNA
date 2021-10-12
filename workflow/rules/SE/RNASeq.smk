@@ -320,7 +320,7 @@ rule salmon_quant:
         "../../envs/RNAseq.yaml"
     priority: 1
     shell:
-        "salmon quant -p {threads} -i {params.idx} -l A -1 {input.f1} --fldMean 275 --fldSD 50 --validateMappings --rangeFactorizationBins 4 --gcBias -o {params.dir} 2>&1 | tee -a {log}"
+        "salmon quant -p {threads} -i {params.idx} -l A -r {input.f1} --fldMean 275 --fldSD 50 --validateMappings --rangeFactorizationBins 4 --gcBias -o {params.dir} 2>&1 | tee -a {log}"
 
 rule featureCounts:
     input:
