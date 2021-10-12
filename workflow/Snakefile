@@ -62,7 +62,7 @@ rule aggregate_outputs:
         arriba="results/fusion/arriba/{sample}.tsv",
         STARfusion="results/fusion/STAR_fusion/{sample}/star-fusion.fusion_predictions.tsv",
         PAcounts="results/paQuant/{sample}_paQuant.tsv.gz",
-        SJcounts=gather_SJ,
+        SJcounts=gather_SJ_aggregate,
         vc="results/variantCalling/vcf_filtered/{sample}.vcf.gz"
     output:
         tarfile="results/tarfiles/{sample}.tar.gz"
@@ -86,7 +86,7 @@ rule aggregate_metrics:
         reads_qc="results/qc/reads_qc.html",
         bam_qc="results/qc/bam_qc.html",
         bam_stat="results/qc/bam_qc_data/multiqc_rseqc_bam_stat.txt",
-        bam_infer_exp="results/qc/bam_qc_data/multiqc_infer_experiment.txt",
+        bam_infer_exp="results/qc/bam_qc_data/multiqc_rseqc_infer_experiment.txt",
         bam_read_distribution="results/qc/bam_qc_data/multiqc_rseqc_read_distribution.txt",
         star_stat="results/qc/bam_qc_data/multiqc_star.txt",
         reads_dup="results/qc/reads_qc_data/mqc_fastqc_sequence_counts_plot_1.txt",

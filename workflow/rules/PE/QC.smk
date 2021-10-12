@@ -192,12 +192,11 @@ rule bamqc:
         expand("results/qc/rseqc/{sample}_{unit}.readdistribution.txt",zip, sample=samples_trim, unit=unit_trim),
         expand("results/qc/rseqc/{sample}_{unit}.readdup.DupRate_plot.pdf",zip, sample=samples_trim, unit=unit_trim),
         expand("results/qc/rseqc/{sample}_{unit}.readgc.GC_plot.pdf",zip, sample=samples_trim, unit=unit_trim),
-        expand("results/STAR_2p/{sample}_{unit}Log.final.out",zip, sample=samples_trim, unit=unit_trim),
-        
+        expand("results/STAR_2p/{sample}_{unit}Log.final.out",zip, sample=samples_trim, unit=unit_trim)
     output:
         out="results/qc/bam_qc.html",
         bam_stat="results/qc/bam_qc_data/multiqc_rseqc_bam_stat.txt",
-        bam_infer_exp="results/qc/bam_qc_data/multiqc_infer_experiment.txt",
+        bam_infer_exp="results/qc/bam_qc_data/multiqc_rseqc_infer_experiment.txt",
         bam_read_distribution="results/qc/bam_qc_data/multiqc_rseqc_read_distribution.txt",
         star_stat="results/qc/bam_qc_data/multiqc_star.txt",
     resources:
