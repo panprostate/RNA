@@ -164,12 +164,51 @@ rule filter_SJs:
         done;
         """
 
+rule insert_SJs:
+    input:
+        SJ=gather_SJ,
+        index=star_index
+    output:
+        filtered="resources/STARindex_hg19_SJ/SA"
+    params:
+        compression=config["compression_level"],
+        idx=lambda wildcards, input: input.index[:-2]
+    threads: 2
+    resources:
+        mem_mb=config["mem_STAR_align"],
+        runtime_min=config["rt_STAR_align"]
+    benchmark:
+        "benchmark/STAR_SJ.tsv"
+    log:
+        "logs/STAR_SJ.log"
+    conda:
+        "../../envs/RNAseq.yaml"
+    priority: 1
+    shell:
+        """
+        touch resources/dummy.fastq
+        mkdir -p resources/STARindex_hg19_SJ
+        cd resources/STARindex_hg19_SJ
+        ln -s ../STARindex_hg19/* .
+        rm -f sjdbList.out.tab sjdbInfo.txt
+        cd ../../
+        STAR \
+        --genomeDir {params.idx} \
+        --readFilesIn resources/dummy.fastq \
+        --runThreadN 2 \
+        --sjdbFileChrStartEnd {input.SJ} \
+        --outFileNamePrefix resources/ \
+        --sjdbInsertSave Basic 2>&1 | tee -a {log}
+        cp resources/_STARgenome/sjdbList.out.tab resources/STARindex_hg19_SJ/
+        cp resources/_STARgenome/sjdbInfo.txt resources/STARindex_hg19_SJ/
+        rm -rf resources/_STARgenome
+        """
+
 rule star_2pass:
     input:
         f1="results/trim/{sample}/{sample}_{unit}_R1_trimmed.fastq.gz",
         f2="results/trim/{sample}/{sample}_{unit}_R2_trimmed.fastq.gz",
-        index=star_index,
-        SJ=gather_SJ
+        index="resources/STARindex_hg19_SJ/SA"
     output:
         bam=temp("results/STAR_2p/{sample}_{unit}Aligned.out.bam"),
         star_logs=multiext("results/STAR_2p/{sample}_{unit}", "SJ.out.tab", "Log.final.out", "Log.out", "Chimeric.out.junction")
@@ -206,7 +245,6 @@ rule star_2pass:
         --outSAMtype BAM Unsorted \
         --alignSJDBoverhangMin 5 \
         --genomeLoad NoSharedMemory \
-        --sjdbFileChrStartEnd {input.SJ} \
         --outFilterMatchNminOverLread 0.1 \
         --outFilterScoreMinOverLread 0.1 \
         --sjdbOverhang 250 \

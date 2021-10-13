@@ -342,4 +342,4 @@ rule VC_filterVCF:
         --filter-name "QD" \
         --filter "QD < 2.0" \
         -O {output.vcf_f}
-        """    
+        """
