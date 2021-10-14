@@ -138,7 +138,7 @@ rule star_1pass:
 
 rule filter_SJs:
     input:
-        SJs=gather_SJ_filter
+        SJs="results/STAR_1p/{sample}_{unit}SJ.out.tab"
     output:
         filtered="results/STAR_1p_filtered/{sample}_{unit}.filtered.SJ.out.tab"
     params:
@@ -157,11 +157,7 @@ rule filter_SJs:
     shell:
         """
         set -e
-        for f in {input.SJs}; 
-        do
-            NN=$(sed 's/SJ.out/.filtered.SJ.out/g' $f)
-            awk -F'\t' '$7 > {params.minCount' $f > $NN
-        done;
+        awk -F'\t' '$7 > {params.minCount}' {input.SJs} > {output.filtered}
         """
 
 rule insert_SJs:
