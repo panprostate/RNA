@@ -162,7 +162,9 @@ rule insert_SJs:
         SJ=gather_SJ,
         index=star_index
     output:
-        filtered="resources/STARindex_hg19_SJ/SA"
+        filtered=temp("results/index/STARindex_hg19_SJ/SA"),
+        sjdbList=temp("results/index/STARindex_hg19_SJ/sjdbList.out.tab"),
+        sjdbInfo=temp("results/index/STARindex_hg19_SJ/sjdbInfo.txt")
     params:
         compression=config["compression_level"],
         idx=lambda wildcards, input: input.index[:-2]
@@ -179,10 +181,10 @@ rule insert_SJs:
     priority: 1
     shell:
         """
-        touch resources/dummy.fastq
-        mkdir -p resources/STARindex_hg19_SJ
-        cd resources/STARindex_hg19_SJ
-        ln -s ../STARindex_hg19/* .
+        touch results/index/dummy.fastq
+        mkdir -p results/index/STARindex_hg19_SJ
+        cd results/index/STARindex_hg19_SJ
+        ln -sf ../../resources/STARindex_hg19/* .
         rm -f sjdbList.out.tab sjdbInfo.txt
         cd ../../
         STAR \
@@ -192,22 +194,26 @@ rule insert_SJs:
         --sjdbFileChrStartEnd {input.SJ} \
         --outFileNamePrefix resources/ \
         --sjdbInsertSave Basic 2>&1 | tee -a {log}
-        cp resources/_STARgenome/sjdbList.out.tab resources/STARindex_hg19_SJ/
-        cp resources/_STARgenome/sjdbInfo.txt resources/STARindex_hg19_SJ/
-        rm -rf resources/_STARgenome
+        cp results/index/_STARgenome/sjdbList.out.tab resources/STARindex_hg19_SJ/
+        cp results/index/_STARgenome/sjdbInfo.txt resources/STARindex_hg19_SJ/
+        rm -rf results/index/_STARgenome
         """
 
 rule star_2pass:
     input:
         f1="results/trim/{sample}/{sample}_{unit}_R1_trimmed.fastq.gz",
         index=star_index,
-        index="resources/STARindex_hg19_SJ/SA"
+        index="results/index/STARindex_hg19_SJ/SA",
+        sjdbList="results/index/STARindex_hg19_SJ/sjdbList.out.tab",
+        sjdbInfo="results/index/STARindex_hg19_SJ/sjdbInfo.txt"
     output:
         bam=temp("results/STAR_2p/{sample}_{unit}Aligned.out.bam"),
         star_logs=multiext("results/STAR_2p/{sample}_{unit}", "SJ.out.tab", "Log.final.out", "Log.out", "Chimeric.out.junction")
     params:
         compression=config["compression_level"],
-        idx=lambda wildcards, input: input.index[:-2]
+        idx=lambda wildcards, input: input.index[:-2],
+        RG="{sample}_{unit}",
+        SM="{sample}"
     threads: config["ncpus_STAR_align"]
     resources:
         mem_mb=config["mem_STAR_align"],
@@ -242,12 +248,13 @@ rule star_2pass:
         --outFilterScoreMinOverLread 0.1 \
         --sjdbOverhang 250 \
         --outSAMstrandField intronMotif \
+        -–outSAMattrRGline ID:{params.RG} SM:{params.SM} PL:illumina \
         --peOverlapNbasesMin 10 \
         --alignSplicedMateMapLminOverLmate 0.5 \
         --alignSJstitchMismatchNmax 5 -1 5 5 \
         --chimSegmentMin 10 \
         --chimOutJunctionFormat 1 \
-        --chimOutType Junctions WithinBAM HardClip \
+        --chimOutType Junctions WithinBAM SoftClip \
         --chimJunctionOverhangMin 10 \
         --chimScoreDropMax 30 \
         --chimScoreJunctionNonGTAG 0 \

@@ -41,7 +41,8 @@ rule VC_create_uBam:
     params:
         tmp_dir=config["tmp_dir"],
         compression=config["compression_level"],
-        RG="{sample}"
+        RG="{sample}_{unit}",
+        SM="{sample}"
     threads: 2
     resources:
         mem_mb=config["mem_create_uBam"],
@@ -54,13 +55,12 @@ rule VC_create_uBam:
         "../../envs/variantCalling.yaml"
     shell:
         """
-        SM=$(basename {input.f1} |  sed 's/_L00.*//g')
         gatk FastqToSam \
         -F1 {input.f1} \
         -F2 {input.f2} \
         -O {output.ubam} \
         -RG {params.RG} \
-        -SM $SM \
+        -SM {params.SM} \
         -PL illumina \
         --TMP_DIR {params.tmp_dir} \
         --COMPRESSION_LEVEL {params.compression} 2>> {log}
@@ -129,7 +129,7 @@ rule VC_concatBam:
 
 rule VC_markDuplicates:
     input:
-        bam="results/variantCalling/concatBam/{sample}.Aligned.sortedByCoord.out.bam"
+        bam=MD_input
     output:
         dedup=temp("results/variantCalling/markDuplicates/{sample}.bam"),
         index=temp("results/variantCalling/markDuplicates/{sample}.bai"),
@@ -280,7 +280,8 @@ rule VC_haplotypeCaller:
         dbSNP="resources/Homo_sapiens_assembly19_1000genomes_decoy.dbsnp138.vcf",
         intervals="results/variantCalling/intervalList/exons.interval_list"
     output:
-        vcf=temp("results/variantCalling/vcf/{sample}.vcf.gz")
+        vcf=temp("results/variantCalling/vcf/{sample}.vcf.gz"),
+        vcfi=temp("results/variantCalling/vcf/{sample}.vcf.gz.tbi")
     params:
         tmp_dir=config["tmp_dir"]
     threads: 2
@@ -312,7 +313,8 @@ rule VC_filterVCF:
         reference="resources/Homo_sapiens_assembly19_1000genomes_decoy.fasta",
         refDict="resources/Homo_sapiens_assembly19_1000genomes_decoy.dict",
         refIndex="resources/Homo_sapiens_assembly19_1000genomes_decoy.fasta.fai",
-        vcf="results/variantCalling/vcf/{sample}.vcf.gz"
+        vcf="results/variantCalling/vcf/{sample}.vcf.gz",
+        vcfi="results/variantCalling/vcf/{sample}.vcf.gz.tbi"
     output:
         vcf_f="results/variantCalling/vcf_filtered/{sample}.vcf.gz",
         vcfIdx="results/variantCalling/vcf_filtered/{sample}.vcf.gz.tbi"

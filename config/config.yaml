@@ -85,6 +85,8 @@ rt_megadepth: "04:00:00"
 ################################################################################
 # Variant Calling Pipeline Configurations
 ################################################################################
+# merge_ubam controls wheter ubams are generated from the fastqs and merged to the bam prior markDuplicates
+merge_ubam: False 
 mem_create_uBam: 4000
 rt_create_uBam: "04:00:00"
 mem_mergeBams: 4000

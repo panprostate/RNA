@@ -58,6 +58,12 @@ def gather_salmon_input2(wildcards):
     fastq2=expand("results/trim/{{sample}}/{{sample}}_{unit}_R2_trimmed.fastq.gz", unit=UNITS)
     return fastq2
 
+def MD_input(wildcards):
+    if config["merge_ubam"] == True:
+        return "results/variantCalling/concatBam/{sample}.Aligned.sortedByCoord.out.bam"
+    else:
+        return "results/mergedBam/{sample}.Aligned.sortedByCoord.out.bam"
+
 def VC_gather_bams(wildcards):
     UNITS=df.loc[wildcards.sample, "unit_name"]
     bams=expand("results/variantCalling/mergedBam/{sample}_{unit}.bam", unit=UNITS, sample=wildcards.sample)
