@@ -184,12 +184,12 @@ rule insert_SJs:
         touch results/index/dummy.fastq
         mkdir -p results/index/STARindex_hg19_SJ
         cd results/index/STARindex_hg19_SJ
-        ln -sf ../../resources/STARindex_hg19/* .
+        ln -sf ../../../resources/STARindex_hg19/* .
         rm -f sjdbList.out.tab sjdbInfo.txt
-        cd ../../
+        cd ../../../
         STAR \
         --genomeDir {params.idx} \
-        --readFilesIn resources/dummy.fastq \
+        --readFilesIn results/index/dummy.fastq \
         --runThreadN 2 \
         --sjdbFileChrStartEnd {input.SJ} \
         --outFileNamePrefix resources/ \
