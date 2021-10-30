@@ -195,7 +195,7 @@ rule insert_SJs:
         --readFilesIn results/index/dummy.fastq \
         --runThreadN 2 \
         --sjdbFileChrStartEnd {input.SJ} \
-        --outFileNamePrefix resources/ \
+        --outFileNamePrefix results/index/ \
         --sjdbInsertSave Basic 2>&1 | tee -a {log}
         cp results/index/_STARgenome/sjdbList.out.tab results/index/STARindex_hg19_SJ/
         cp results/index/_STARgenome/sjdbInfo.txt results/index/STARindex_hg19_SJ/
