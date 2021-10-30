@@ -197,8 +197,8 @@ rule insert_SJs:
         --sjdbFileChrStartEnd {input.SJ} \
         --outFileNamePrefix resources/ \
         --sjdbInsertSave Basic 2>&1 | tee -a {log}
-        cp results/index/_STARgenome/sjdbList.out.tab resources/STARindex_hg19_SJ/
-        cp results/index/_STARgenome/sjdbInfo.txt resources/STARindex_hg19_SJ/
+        cp results/index/_STARgenome/sjdbList.out.tab results/index/STARindex_hg19_SJ/
+        cp results/index/_STARgenome/sjdbInfo.txt results/index/STARindex_hg19_SJ/
         rm -rf results/index/_STARgenome
         """
 
