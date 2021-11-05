@@ -117,7 +117,7 @@ rule aggregate_metrics:
         """
         set -e
         mv {params.map_gene_gc_stat} {output.map_gene_gc_stat}
-        mv {params.map_gene_gf_stat} {output.map_gene_fc_stat}
+        mv {params.map_gene_fc_stat} {output.map_gene_fc_stat}
         mv {params.map_exon_gc_stat} {output.map_exon_gc_stat}
         mv {params.map_exon_fc_stat} {output.map_exon_fc_stat}
         tar -czvf {output.tarfile} {input} {output.map_gene_gc_stat} {output.map_gene_fc_stat} {output.map_exon_gc_stat} {output.map_exon_fc_stat}
