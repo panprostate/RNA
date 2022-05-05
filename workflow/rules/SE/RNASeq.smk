@@ -393,10 +393,10 @@ rule featureCounts:
     priority: 1
     shell:
         """
-        featureCounts -p -a {input.gtf} -T {threads} -s {params.strand} -t exon -g gene_id -o {output.gene_counts} {input.bam}
-        featureCounts -p -a {input.fc} -T {threads} -s {params.strand} -t exon -g gene_id -o {output.gene_counts_fc} {input.bam}
-        featureCounts -p -f -O -a {input.gtf} -T {threads} -s {params.strand} -t exon -g gene_id -o {output.exon_counts} {input.bam}
-        featureCounts -p -f -O -a {input.fc} -T {threads} -s {params.strand} -t exon -g gene_id -o {output.exon_counts_fc} {input.bam}
+        featureCounts -a {input.gtf} -T {threads} -s {params.strand} -t exon -g gene_id -o {output.gene_counts} {input.bam}
+        featureCounts -a {input.fc} -T {threads} -s {params.strand} -t exon -g gene_id -o {output.gene_counts_fc} {input.bam}
+        featureCounts -f -O -a {input.gtf} -T {threads} -s {params.strand} -t exon -g gene_id -o {output.exon_counts} {input.bam}
+        featureCounts -f -O -a {input.fc} -T {threads} -s {params.strand} -t exon -g gene_id -o {output.exon_counts_fc} {input.bam}
         """
 
 rule TxImport:
