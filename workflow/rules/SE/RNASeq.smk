@@ -269,7 +269,7 @@ rule sortBam:
         bam="results/STAR_2p/{sample}_{unit}Aligned.out.bam"
     output:
         sbam=temp("results/sortedBams/{sample}_{unit}.Aligned.sortedByCoord.out.bam"),
-        bai=temp("results/sortedBams/{sample}_{unit}.Aligned.sortedByCoord.out.bam.bai")
+        bai="results/sortedBams/{sample}_{unit}.Aligned.sortedByCoord.out.bam.bai"
     threads: config["ncpus_sortBam"]
     resources:
         mem_mb=config["mem_sortBam"],

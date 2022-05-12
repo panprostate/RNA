@@ -277,7 +277,7 @@ rule reads_qc:
         "../../envs/RNAseq.yaml"
     shell:
         "multiqc"
-        " --force"
+        " --force -fp"
         " -o {params.outDir}"
         " -n {params.name}"
         " {input}"
