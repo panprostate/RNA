@@ -40,7 +40,8 @@ rule VC_create_uBam:
     params:
         tmp_dir=config["tmp_dir"],
         compression=config["compression_level"],
-        RG="{sample}"
+        RG="{sample}_{unit}",
+        SM="{sample}"
     threads: 2
     resources:
         mem_mb=config["mem_create_uBam"],
@@ -53,12 +54,11 @@ rule VC_create_uBam:
         "../../envs/variantCalling.yaml"
     shell:
         """
-        SM=$(basename {input.f1} |  sed 's/_L00.*//g')
         gatk FastqToSam \
         -F1 {input.f1} \
         -O {output.ubam} \
         -RG {params.RG} \
-        -SM $SM \
+        -SM {params.SM} \
         -PL illumina \
         --TMP_DIR {params.tmp_dir} \
         --COMPRESSION_LEVEL {params.compression} 2>> {log}
@@ -266,6 +266,32 @@ rule VC_applyBQSR:
         --use-original-qualities \
         -O {output.recalbam} \
         --bqsr-recal-file {input.table} 2>> {log}
+        """
+
+rule fixBam:
+    input:
+        bam="results/variantCalling/splitNCigars/{sample}.bam",
+        table="results/variantCalling/recalibration/{sample}.tbl"
+    output:
+        fixbam="results/variantCalling/recalibration/fix/{sample}.bam",
+        table="results/variantCalling/recalibration//fix/{sample}.tbl"
+        bai="results/variantCalling/recalibration/fix/{sample}.bai"
+    params:
+        tmp_dir=config["tmp_dir"],
+        compression=config["compression_level"]
+    threads: 2
+    resources:
+        mem_mb=4000
+        runtime_min=24:00:00
+    log:
+        "logs/fix/{sample}.log"
+    conda:
+        "../../envs/variantCalling.yaml"
+    shell:
+        """
+        samtools reheader -c 'perl -pe "s/^(@RG.*\t)(SM:.*)(\tPL:illumina)/\$1SM:{wildcards.sample}\$3/"' {input.bam} > {output.fixbam}
+        samtools index {output.fixbam}
+        cp {input.table} {output.table}
         """
 
 rule VC_haplotypeCaller:
