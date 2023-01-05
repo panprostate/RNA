@@ -270,13 +270,40 @@ rule VC_applyBQSR:
         --bqsr-recal-file {input.table} 2>> {log}
         """
 
+rule fixBam:
+     input:
+         bam="results/variantCalling/recalibration/{sample}.bam",
+         table="results/variantCalling/recalibration/{sample}.tbl"
+     output:
+         fixbam="results/variantCalling/recalibration/fix/{sample}.bam",
+         table="results/variantCalling/recalibration//fix/{sample}.tbl"
+         bai="results/variantCalling/recalibration/fix/{sample}.bai"
+     params:
+         tmp_dir=config["tmp_dir"],
+         compression=config["compression_level"]
+     threads: 2
+     resources:
+         mem_mb=4000
+         runtime_min=24:00:00
+     log:
+         "logs/fix/{sample}.log"
+     conda:
+         "../../envs/variantCalling.yaml"
+     shell:
+         """
+         samtools reheader -c 'perl -pe "s/^(@RG.*\t)(SM:.*)(\tPL:illumina)/\$1SM:{wildcards.sample}\$3/"' {input.bam} > {output.fixbam}
+         samtools index {output.fixbam}
+         cp {input.table} {output.table}
+         """
+        
+        
 rule VC_haplotypeCaller:
     input:
         reference="resources/Homo_sapiens_assembly19_1000genomes_decoy.fasta",
         refDict="resources/Homo_sapiens_assembly19_1000genomes_decoy.dict",
         refIndex="resources/Homo_sapiens_assembly19_1000genomes_decoy.fasta.fai",
-        bam="results/variantCalling/recalibration/{sample}.bam",
-        bai="results/variantCalling/recalibration/{sample}.bai",
+        bam="results/variantCalling/recalibration/fix/{sample}.bam",
+        bai="results/variantCalling/recalibration/fix/{sample}.bai",
         dbSNP="resources/Homo_sapiens_assembly19_1000genomes_decoy.dbsnp138.vcf",
         intervals="results/variantCalling/intervalList/exons.interval_list"
     output:
