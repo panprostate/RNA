@@ -276,7 +276,7 @@ rule fixBam:
         table="results/variantCalling/recalibration/{sample}.tbl"
     output:
         fixbam="results/variantCalling/recalibration/fix/{sample}.bam",
-        table="results/variantCalling/recalibration//fix/{sample}.tbl"
+        table="results/variantCalling/recalibration//fix/{sample}.tbl",
         bai="results/variantCalling/recalibration/fix/{sample}.bai"
     params:
         tmp_dir=config["tmp_dir"],
@@ -284,7 +284,7 @@ rule fixBam:
     threads: 2
     resources:
         mem_mb=4000
-        runtime_min=24:00:00
+        runtime_min="24:00:00"
     log:
         "logs/fix/{sample}.log"
     conda:
